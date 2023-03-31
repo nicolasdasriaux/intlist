@@ -1,12 +1,10 @@
 package org.example;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.IntPredicate;
 
 public class IntList implements Comparable<IntList> {
-    private int[] array;
+    private final int[] array;
 
     private IntList(int[] array) {
         this.array = array;
@@ -22,26 +20,14 @@ public class IntList implements Comparable<IntList> {
 
     public boolean contains(int value) {
         return toBuilderNonLeaking().contains(value);
-
-        /*
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == value) {
-                return true;
-            }
-        }
-
-        return false;
-        */
     }
 
     public boolean containsAll(IntList values) {
-        for (int i = 0; i < values.array.length; i++) {
-            if (!this.contains(values.array[i])) {
-                return false;
-            }
-        }
+        return toBuilderNonLeaking().containsAll(values);
+    }
 
-        return true;
+    public boolean containsAny(IntList values) {
+        return toBuilderNonLeaking().containsAny(values);
     }
 
     public IntList set(int index, int value) {
@@ -78,38 +64,18 @@ public class IntList implements Comparable<IntList> {
         return toBuilderGrowing(1)
                 .add(value)
                 .buildNonLeaking();
-        /**
-         * int[] newArray = new int[array.length + 1];
-         * System.arraycopy(array, 0, newArray, 0, array.length);
-         * newArray[newArray.length - 1] = value;
-         * return IntList.of(newArray);
-        */
     }
 
     public IntList addAll(IntList values) {
         return toBuilderGrowing(values.array.length)
                 .addAll(values)
                 .build();
-
-        /**
-         * int[] newArray = new int[array.length + values.array.length];
-         * System.arraycopy(array, 0, newArray, 0, array.length);
-         * System.arraycopy(values.array, 0, newArray, array.length, values.array.length);
-         * return IntList.of(newArray)
-        */
     }
 
     public IntList addFirst(int value) {
         return toBuilderGrowing(1)
                 .addFirst(value)
                 .build();
-
-        /*
-        int[] newArray = new int[this.array.length + 1];
-        System.arraycopy(array, 0, newArray, 1, array.length);
-        newArray[0] = value;
-        return IntList.of(newArray);
-        */
     }
 
     public IntList addAllFirst(IntList values) {
@@ -204,10 +170,6 @@ public class IntList implements Comparable<IntList> {
         return builder.build();
     }
 
-    public static Builder emptyBuilder(int initialCapacity) {
-        return Builder.empty(initialCapacity);
-    }
-
     private Builder toBuilderGrowing(int growth) {
         return Builder.ofGrowing(array, growth);
     }
@@ -265,6 +227,26 @@ public class IntList implements Comparable<IntList> {
         public boolean contains(int value) {
             for (int i = 0; i < length; i++) {
                 if (array[i] == value) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public boolean containsAll(IntList values) {
+            for (int i = 0; i < values.array.length; i++) {
+                if (!contains(values.array[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public boolean containsAny(IntList values) {
+            for (int i = 0; i < length; i++) {
+                if (values.contains(array[i])) {
                     return true;
                 }
             }
@@ -428,16 +410,14 @@ public class IntList implements Comparable<IntList> {
 
         @Override
         public String toString() {
-            return new StringBuilder()
-                    .append("IntList.Builder[")
-                    .append("array=")
-                    .append(Arrays.toString(Arrays.copyOf(array, length)))
-                    .append(Arrays.toString(Arrays.copyOfRange(array, length, capacity)))
-                    .append(", length=")
-                    .append(length)
-                    .append(", capacity=")
-                    .append(capacity).append("]")
-                    .toString();
+            return "IntList.Builder[" +
+                    "array=" +
+                    Arrays.toString(Arrays.copyOf(array, length)) +
+                    Arrays.toString(Arrays.copyOfRange(array, length, capacity)) +
+                    ", length=" +
+                    length +
+                    ", capacity=" +
+                    capacity + "]";
         }
 
         public IntList build() {
