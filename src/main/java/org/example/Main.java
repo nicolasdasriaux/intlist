@@ -47,29 +47,27 @@ public class Main {
                     .replaceAll(i -> i * 1000)
                     .swap(0, 1)
                     .addFirst(0)
-                    .addAllFirst(intList.of(1, 1, 1))
+                    .addAllFirst(IntList.of(1, 1, 1))
                     .build();
 
             System.out.printf("newIntList=%s%n", newIntList);
         }
 
         {
-            final IntList newIntList = intList.build(b -> {
-                b
-                        .set(0, 5)
-                        .set(2, 18)
-                        .sort()
-                        .add(92)
-                        .add(91)
-                        .add(90)
-                        .addAll(IntList.of(105, 104, 103))
-                        .sort()
-                        .insert(0, 222)
-                        .insertAll(1, IntList.of(333, 444, 555))
-                        .delete(3)
-                        .replaceAll(i -> i * 1000)
-                        .swap(0, 1);
-            });
+            final IntList newIntList = intList.build(b -> b
+                    .set(0, 5)
+                    .set(2, 18)
+                    .sort()
+                    .add(92)
+                    .add(91)
+                    .add(90)
+                    .addAll(IntList.of(105, 104, 103))
+                    .sort()
+                    .insert(0, 222)
+                    .insertAll(1, IntList.of(333, 444, 555))
+                    .delete(3)
+                    .replaceAll(i -> i * 1000)
+                    .swap(0, 1));
 
             System.out.printf("newIntList=%s%n", newIntList);
         }
@@ -105,5 +103,7 @@ public class Main {
                         .swap(1, 0)
                         .map(i -> i * 10)
         );
+
+        System.out.println(IntList.of(5, -1, 2, 45, -12).filter(i -> i > 0));
     }
 }

@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 public class IntList implements Comparable<IntList> {
     private final int[] array;
@@ -105,6 +106,12 @@ public class IntList implements Comparable<IntList> {
     public IntList map(IntToIntFunction function) {
         return toBuilder()
                 .replaceAll(function)
+                .buildNonLeaking();
+    }
+
+    public IntList filter(IntPredicate predicate) {
+        return toBuilder()
+                .filter(predicate)
                 .buildNonLeaking();
     }
 
@@ -361,6 +368,19 @@ public class IntList implements Comparable<IntList> {
                 array[i] = function.apply(array[i]);
             }
 
+            return this;
+        }
+
+        public Builder filter(IntPredicate predicate) {
+            final Builder builder = Builder.empty(length);
+
+            for (int i = 0; i < length; i++) {
+                if(predicate.test(array[i])) {
+                    builder.add(array[i]);
+                }
+            }
+
+            reset(builder);
             return this;
         }
 
