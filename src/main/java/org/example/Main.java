@@ -1,10 +1,61 @@
 package org.example;
 
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
+        System.out.println(IntList.of(1, 2, 3, 4, 5, 6).arrangements(3));
+
+        final List<IntList> l2 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).combinations(5).stream()
+                .flatMap(c -> c.permutations().stream())
+                .toList();
+
+        System.out.println(l2);
+        System.out.println(l2.size());
+
+        final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 6).combinations(3).stream()
+                .flatMap(c -> c.permutations().stream())
+                .toList();
+
+        System.out.println(list);
+        System.out.println(IntList.of(1, 2, 3, 4, 5).permutations());
+
+        {
+            IntList intList = IntList.Builder.of(new int[] {1, 2, 3}).debug("init")
+                    .addAllFirst(IntList.of(-2, -1, 0)).debug("addAllFirst")
+                    .addAllFirst(IntList.of(-5, -4, -3)).debug("addAllFirst")
+                    .addAllFirst(IntList.of(-11, -10, -9, -8, -7, -6)).debug("addAllFirst")
+                    .addAll(IntList.of( 4, 5, 6, 7, 8, 9, 10, 11, 12)).debug("addAll")
+                    .build();
+        }
+
+        {
+            final IntList intList = IntList.Builder.empty(25).debug(".empty(25)")
+                    .add(5).debug(".add(5)")
+                    .addFirst(4).debug("addFirst")
+                    .addAll(IntList.of(6, 7, 8)).debug(".addFirst(4)")
+                    .addAllFirst(IntList.of(2, 3)).debug("addAllFirst(IntList.of(2, 3))")
+                    .set(0, -2).debug(".set(0, -2)")
+                    .set(6, -8).debug(".set(6, -8)")
+                    .swap(0, 6).debug(".swap(0, 6)")
+                    .sort().debug(".sort()")
+                    .reverse().debug(".reverse()")
+                    .retainAll(IntList.of(3, 4, 5, 6, 7, -10)).debug(".retainAll(IntList.of(3, 4, 5, 6, 7, -10))")
+                    .remove(5).debug(".remove(5)")
+                    .removeAll(IntList.of(4, 7)).debug(".removeAll(IntList.of(4, 7))")
+                    .insert(1, 10).debug(".insert(1, 10)")
+                    .insertAll(2, IntList.of(11, -1, 12, 13)).debug(".insertAll(2, IntList.of(11, -1, 12, 13))")
+                    .delete(3).debug(".delete(3)")
+                    .filter(i -> i > 10).debug(".filter(i -> i > 10)")
+                    .map(i -> i * 10).debug(".map(i -> i * 10)")
+                    .replace(120, 220).debug(".replace(120, 220)")
+                    .build();
+
+            System.out.println(intList);
+        }
         final IntList intList = IntList.of(1, 2, 3);
 
-        final IntList.Builder builder = intList.toBuilder();
+        final IntList.Builder builder = intList.toBuilder(20, 20);
         System.out.println(builder);
         builder.set(0, 5);
         System.out.println(builder);
@@ -44,7 +95,7 @@ public class Main {
                     .insert(0, 222)
                     .insertAll(1, IntList.of(333, 444, 555))
                     .delete(3)
-                    .replaceAll(i -> i * 1000)
+                    .map(i -> i * 1000)
                     .swap(0, 1)
                     .addFirst(0)
                     .addAllFirst(IntList.of(1, 1, 1))
@@ -54,7 +105,7 @@ public class Main {
         }
 
         {
-            final IntList newIntList = intList.build(b -> b
+            final IntList newIntList = intList.build(20, 20, b -> b
                     .set(0, 5)
                     .set(2, 18)
                     .sort()
@@ -66,7 +117,7 @@ public class Main {
                     .insert(0, 222)
                     .insertAll(1, IntList.of(333, 444, 555))
                     .delete(3)
-                    .replaceAll(i -> i * 1000)
+                    .map(i -> i * 1000)
                     .swap(0, 1));
 
             System.out.printf("newIntList=%s%n", newIntList);
