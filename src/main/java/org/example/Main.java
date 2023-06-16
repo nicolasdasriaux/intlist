@@ -1,17 +1,39 @@
 package org.example;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Main {
+    public static void timed(int iterations, Runnable runnable) {
+        final long start = System.nanoTime();
+
+        for (int i = 0; i < iterations; i++) {
+            runnable.run();
+        }
+
+        final long end = System.nanoTime();
+        long total = end - start;
+        System.out.println(">>> %d ms".formatted(total / 1_000_000));
+        System.out.println(">>> %d ns / operation".formatted(total / iterations));
+    }
+
     public static void main(String[] args) {
-        System.out.println(IntList.of(1, 2, 3, 4, 5, 6).arrangements(3));
+        System.out.println(IntList.of(4, 6, 8, 9, 10).arrangements(3));
+        System.out.println(IntList.rangeClosed(1, 5));
+        System.out.println(IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).arrangements(3).size());
 
-        final List<IntList> l2 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).combinations(5).stream()
-                .flatMap(c -> c.permutations().stream())
-                .toList();
+        System.out.println(IntList.rangeClosed(1, 5).combinations(3));
 
-        System.out.println(l2);
-        System.out.println(l2.size());
+        timed(2_000_000, () -> {
+            final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).arrangements(3);
+        });
+
+        timed(2_000_000, () -> {
+            final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).combinations(3).stream()
+                    .flatMap(combination -> combination.permutations().stream())
+                    .toList();
+
+        });
 
         final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 6).combinations(3).stream()
                 .flatMap(c -> c.permutations().stream())
@@ -21,11 +43,11 @@ public class Main {
         System.out.println(IntList.of(1, 2, 3, 4, 5).permutations());
 
         {
-            IntList intList = IntList.Builder.of(new int[] {1, 2, 3}).debug("init")
+            IntList intList = IntList.Builder.of(new int[]{1, 2, 3}).debug("init")
                     .addAllFirst(IntList.of(-2, -1, 0)).debug("addAllFirst")
                     .addAllFirst(IntList.of(-5, -4, -3)).debug("addAllFirst")
                     .addAllFirst(IntList.of(-11, -10, -9, -8, -7, -6)).debug("addAllFirst")
-                    .addAll(IntList.of( 4, 5, 6, 7, 8, 9, 10, 11, 12)).debug("addAll")
+                    .addAll(IntList.of(4, 5, 6, 7, 8, 9, 10, 11, 12)).debug("addAll")
                     .build();
         }
 

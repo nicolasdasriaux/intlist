@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
+import java.util.stream.IntStream;
 
 public class IntList implements Comparable<IntList> {
     private final int[] array;
@@ -40,24 +41,27 @@ public class IntList implements Comparable<IntList> {
     }
 
     public List<IntList> arrangements(int k) {
-        final int[] item = new int[k];
+        final List<IntList> combinations = combinations(k);
+        final List<IntList> permutations = IntList.range(0, k).permutations();
+
         final List<IntList> items = new ArrayList<>();
-        arrangementsLoop(k, k, 0, item, items);
-        return items;
-    }
+        final int[] item = new int[k];
 
-    private void arrangementsLoop(int k, int kk, long indices, int[] item, List<IntList> items) {
-        if (kk == 0) {
-            items.add(IntList.of(item.clone()));
-        } else {
-            for (int i = 0; i < array.length; i++) {
-                item[k - kk] = array[i];
+        for (int c = 0; c < combinations.size(); c++) {
+            int[] combination = combinations.get(c).array;
 
-                if ((indices & 1L << i) == 0) {
-                    arrangementsLoop(k, kk - 1, indices | 1L << i, item, items);
+            for (int p = 0; p < permutations.size(); p++) {
+                int[] permutation = permutations.get(p).array;
+
+                for (int i = 0; i < permutation.length; i++) {
+                    item[i] = combination[permutation[i]];
                 }
+
+                items.add(IntList.of(item.clone()));
             }
         }
+
+        return items;
     }
 
     public List<IntList> permutations() {
@@ -229,6 +233,14 @@ public class IntList implements Comparable<IntList> {
 
     public static IntList of(int... array) {
         return new IntList(array);
+    }
+
+    public static IntList range(int startInclusive, int endExclusive) {
+        return IntList.of(IntStream.range(startInclusive, endExclusive).toArray());
+    }
+
+    public static IntList rangeClosed(int startInclusive, int endInclusive) {
+        return IntList.of(IntStream.rangeClosed(startInclusive, endInclusive).toArray());
     }
 
     public Builder toBuilder() {
