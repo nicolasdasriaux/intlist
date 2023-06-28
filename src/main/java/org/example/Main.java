@@ -18,17 +18,19 @@ public class Main {
     }
 
     public static void main(String[] args) {
+
+        IntList.of(1, 2, 3).toBuilder(1, 1).addFirst(0).add(4).build();
         System.out.println(IntList.of(4, 6, 8, 9, 10).arrangements(3));
         System.out.println(IntList.rangeClosed(1, 5));
         System.out.println(IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).arrangements(3).size());
 
         System.out.println(IntList.rangeClosed(1, 5).combinations(3));
 
-        timed(2_000_000, () -> {
+        timed(1000, () -> {
             final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).arrangements(3);
         });
 
-        timed(2_000_000, () -> {
+        timed(1000, () -> {
             final List<IntList> list = IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).combinations(3).stream()
                     .flatMap(combination -> combination.permutations().stream())
                     .toList();
@@ -43,7 +45,7 @@ public class Main {
         System.out.println(IntList.of(1, 2, 3, 4, 5).permutations());
 
         {
-            IntList intList = IntList.Builder.of(new int[]{1, 2, 3}).debug("init")
+            IntList intList = IntList.of(1, 2, 3).toBuilder().debug("init")
                     .addAllFirst(IntList.of(-2, -1, 0)).debug("addAllFirst")
                     .addAllFirst(IntList.of(-5, -4, -3)).debug("addAllFirst")
                     .addAllFirst(IntList.of(-11, -10, -9, -8, -7, -6)).debug("addAllFirst")

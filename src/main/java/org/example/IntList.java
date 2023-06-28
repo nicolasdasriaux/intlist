@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
@@ -12,14 +13,6 @@ public class IntList implements Comparable<IntList> {
 
     private IntList(int[] array) {
         this.array = array;
-    }
-
-    public int size() {
-        return array.length;
-    }
-
-    public int get(int index) {
-        return array[index];
     }
 
     public List<IntList> combinations(int k) {
@@ -83,6 +76,14 @@ public class IntList implements Comparable<IntList> {
                 }
             }
         }
+    }
+
+    public int size() {
+        return array.length;
+    }
+
+    public int get(int index) {
+        return array[index];
     }
 
     public boolean contains(int value) {
@@ -499,10 +500,7 @@ public class IntList implements Comparable<IntList> {
 
             for (int i = start; i < end; i++) {
                 if (predicate.test(buffer[i])) {
-                    if (j < i) {
-                        buffer[j] = buffer[i];
-                    }
-
+                    buffer[j] = buffer[i];
                     j++;
                 }
             }
@@ -528,8 +526,14 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder delete(int index) {
-            System.arraycopy(buffer, start + index + 1, buffer, start + index, end - start - index);
-            this.end--;
+            if (index == 0) {
+                start++;
+            } else if (index == size() -1) {
+                end--;
+            } else {
+                System.arraycopy(buffer, start + index + 1, buffer, start + index, end - start - index - 1);
+                this.end--;
+            }
             return this;
         }
 
@@ -545,7 +549,7 @@ public class IntList implements Comparable<IntList> {
                     end = required + size;
                 } else {
                     // Acquire enough leading capacity while balancing leading and trailing capacity
-                    int newCapacity = capacity;
+                    int newCapacity = capacity == 0 ? 1 : capacity;
                     int newLeadingCapacity;
 
                     do {
@@ -574,7 +578,7 @@ public class IntList implements Comparable<IntList> {
                     end = capacity - required;
                 } else {
                     // Acquire enough trailing capacity while balancing leading and trailing capacity
-                    int newCapacity = capacity;
+                    int newCapacity = capacity == 0 ? 1 : capacity;
                     int newLeadingCapacity;
                     int newTrailingCapacity;
 
