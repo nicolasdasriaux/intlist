@@ -86,6 +86,12 @@ public class IntList implements Comparable<IntList> {
         return array[index];
     }
 
+    public IntList subList(int start, int end) {
+        return toBuilder()
+                .subList(start, end)
+                .buildNonLeaking();
+    }
+
     public boolean contains(int value) {
         return toBuilderNonMutated().contains(value);
     }
@@ -307,6 +313,13 @@ public class IntList implements Comparable<IntList> {
 
         public int get(int index) {
             return buffer[start + index];
+        }
+
+        public Builder subList(int start, int end) {
+            int s = this.start;
+            this.start = s + start;
+            this.end = s + end;
+            return this;
         }
 
         public Builder set(int index, int value) {

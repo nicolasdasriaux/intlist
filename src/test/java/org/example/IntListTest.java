@@ -59,6 +59,15 @@ class IntListTest {
 		}
 
 		@Example
+		void subList() {
+			final IntList list = IntList.of(10, 20, 30, 40, 50);
+			assertThat(list.subList(1, 4)).isEqualTo(IntList.of(20, 30, 40));
+			assertThat(list.subList(0, 4)).isEqualTo(IntList.of(10, 20, 30, 40));
+			assertThat(list.subList(1, 5)).isEqualTo(IntList.of(20, 30, 40, 50));
+			assertThat(list.subList(0, 5)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+		}
+
+		@Example
 		void swap() {
 			final IntList list = IntList.of(10, 20, 30);
 			assertThat(list.swap(0, 1)).isEqualTo(IntList.of(20, 10, 30));
