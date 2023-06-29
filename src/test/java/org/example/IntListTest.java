@@ -174,6 +174,54 @@ class IntListTest {
 		}
 
 		@Example
+		void combinations() {
+			final IntList list = IntList.of(5, 6, 7, 8);
+
+			assertThat(list.combinations(2)).containsExactlyInAnyOrder(
+					IntList.of(5, 6),
+					IntList.of(5, 7),
+					IntList.of(5, 8),
+					IntList.of(6, 7),
+					IntList.of(6, 8),
+					IntList.of(7, 8)
+			);
+		}
+
+		@Example
+		void arrangements() {
+			final IntList list = IntList.of(5, 6, 7, 8);
+
+			assertThat(list.arrangements(2)).containsExactlyInAnyOrder(
+					IntList.of(5, 6),
+					IntList.of(6, 5),
+					IntList.of(5, 7),
+					IntList.of(7, 5),
+					IntList.of(5, 8),
+					IntList.of(8, 5),
+					IntList.of(6, 7),
+					IntList.of(7, 6),
+					IntList.of(6, 8),
+					IntList.of(8, 6),
+					IntList.of(7, 8),
+					IntList.of(8, 7)
+			);
+		}
+
+		@Example
+		void permutations() {
+			final IntList list = IntList.of(5, 6, 7);
+
+			assertThat(list.permutations()).containsExactlyInAnyOrder(
+					IntList.of(5, 6, 7),
+					IntList.of(5, 7, 6),
+					IntList.of(6, 5, 7),
+					IntList.of(6, 7, 5),
+					IntList.of(7, 5, 6),
+					IntList.of(7, 6, 5)
+			);
+		}
+
+		@Example
 		void equals() {
 			assertThat(IntList.of(10, 20, 30)).isEqualTo(IntList.of(10, 20, 30));
 			assertThat(IntList.of(10, 20, -30)).isNotEqualTo(IntList.of(10, 20, 30));
@@ -186,7 +234,7 @@ class IntListTest {
 
 			assertThat(
 					a.equals(b) && a.hashCode() == b.hashCode() ||
-					!a.equals(b)
+							!a.equals(b)
 			).isTrue();
 		}
 
