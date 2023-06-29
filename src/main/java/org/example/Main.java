@@ -1,7 +1,6 @@
 package org.example;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class Main {
     public static void timed(int iterations, Runnable runnable) {
@@ -19,7 +18,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        IntList.of(1, 2, 3).toBuilder(1, 1).addFirst(0).add(4).build();
+        IntList.of(1, 2, 3).toBuilder(1, 1).prepend(0).append(4).build();
         System.out.println(IntList.of(4, 6, 8, 9, 10).arrangements(3));
         System.out.println(IntList.rangeClosed(1, 5));
         System.out.println(IntList.of(1, 2, 3, 4, 5, 7, 8, 9, 10).arrangements(3).size());
@@ -46,19 +45,19 @@ public class Main {
 
         {
             IntList intList = IntList.of(1, 2, 3).toBuilder().debug("init")
-                    .addAllFirst(IntList.of(-2, -1, 0)).debug("addAllFirst")
-                    .addAllFirst(IntList.of(-5, -4, -3)).debug("addAllFirst")
-                    .addAllFirst(IntList.of(-11, -10, -9, -8, -7, -6)).debug("addAllFirst")
-                    .addAll(IntList.of(4, 5, 6, 7, 8, 9, 10, 11, 12)).debug("addAll")
+                    .prependAll(IntList.of(-2, -1, 0)).debug("addAllFirst")
+                    .prependAll(IntList.of(-5, -4, -3)).debug("addAllFirst")
+                    .prependAll(IntList.of(-11, -10, -9, -8, -7, -6)).debug("addAllFirst")
+                    .appendAll(IntList.of(4, 5, 6, 7, 8, 9, 10, 11, 12)).debug("addAll")
                     .build();
         }
 
         {
             final IntList intList = IntList.Builder.empty(25).debug(".empty(25)")
-                    .add(5).debug(".add(5)")
-                    .addFirst(4).debug("addFirst")
-                    .addAll(IntList.of(6, 7, 8)).debug(".addFirst(4)")
-                    .addAllFirst(IntList.of(2, 3)).debug("addAllFirst(IntList.of(2, 3))")
+                    .append(5).debug(".add(5)")
+                    .prepend(4).debug("addFirst")
+                    .appendAll(IntList.of(6, 7, 8)).debug(".addFirst(4)")
+                    .prependAll(IntList.of(2, 3)).debug("addAllFirst(IntList.of(2, 3))")
                     .set(0, -2).debug(".set(0, -2)")
                     .set(6, -8).debug(".set(6, -8)")
                     .swap(0, 6).debug(".swap(0, 6)")
@@ -69,7 +68,7 @@ public class Main {
                     .removeAll(IntList.of(4, 7)).debug(".removeAll(IntList.of(4, 7))")
                     .insert(1, 10).debug(".insert(1, 10)")
                     .insertAll(2, IntList.of(11, -1, 12, 13)).debug(".insertAll(2, IntList.of(11, -1, 12, 13))")
-                    .delete(3).debug(".delete(3)")
+                    .removeAt(3).debug(".delete(3)")
                     .filter(i -> i > 10).debug(".filter(i -> i > 10)")
                     .map(i -> i * 10).debug(".map(i -> i * 10)")
                     .replace(120, 220).debug(".replace(120, 220)")
@@ -87,13 +86,13 @@ public class Main {
         System.out.println(builder);
         builder.sort();
         System.out.println(builder);
-        builder.add(92);
+        builder.append(92);
         System.out.println(builder);
-        builder.add(91);
+        builder.append(91);
         System.out.println(builder);
-        builder.add(90);
+        builder.append(90);
         System.out.println(builder);
-        builder.addAll(IntList.of(105, 104, 103));
+        builder.appendAll(IntList.of(105, 104, 103));
         System.out.println(builder);
         builder.sort();
         System.out.println(builder);
@@ -101,7 +100,7 @@ public class Main {
         System.out.println(builder);
         builder.insertAll(1, IntList.of(333, 444, 555));
         System.out.println(builder);
-        builder.delete(3);
+        builder.removeAt(3);
         System.out.println(builder);
         final IntList updatedIntList = builder.build();
         System.out.printf("updatedIntList=%s%n", updatedIntList);
@@ -111,18 +110,18 @@ public class Main {
                     .set(0, 5)
                     .set(2, 18)
                     .sort()
-                    .add(92)
-                    .add(91)
-                    .add(90)
-                    .addAll(IntList.of(105, 104, 103))
+                    .append(92)
+                    .append(91)
+                    .append(90)
+                    .appendAll(IntList.of(105, 104, 103))
                     .sort()
                     .insert(0, 222)
                     .insertAll(1, IntList.of(333, 444, 555))
-                    .delete(3)
+                    .removeAt(3)
                     .map(i -> i * 1000)
                     .swap(0, 1)
-                    .addFirst(0)
-                    .addAllFirst(IntList.of(1, 1, 1))
+                    .prepend(0)
+                    .prependAll(IntList.of(1, 1, 1))
                     .build();
 
             System.out.printf("newIntList=%s%n", newIntList);
@@ -133,14 +132,14 @@ public class Main {
                     .set(0, 5)
                     .set(2, 18)
                     .sort()
-                    .add(92)
-                    .add(91)
-                    .add(90)
-                    .addAll(IntList.of(105, 104, 103))
+                    .append(92)
+                    .append(91)
+                    .append(90)
+                    .appendAll(IntList.of(105, 104, 103))
                     .sort()
                     .insert(0, 222)
                     .insertAll(1, IntList.of(333, 444, 555))
-                    .delete(3)
+                    .removeAt(3)
                     .map(i -> i * 1000)
                     .swap(0, 1));
 
@@ -150,7 +149,7 @@ public class Main {
         {
             final IntList poussette = IntList.of(1, 2, 3, 4).toBuilder()
                     .remove(2)
-                    .add(10)
+                    .append(10)
                     .build();
 
             System.out.println("poussette = " + poussette);
@@ -164,10 +163,10 @@ public class Main {
 
         System.out.println(
                 IntList.of(6, 7, 8)
-                        .addAll(IntList.of(9, 10, 11))
-                        .add(12)
-                        .addFirst(4)
-                        .addAllFirst(IntList.of(1, 2, 3))
+                        .appendAll(IntList.of(9, 10, 11))
+                        .append(12)
+                        .prepend(4)
+                        .prependAll(IntList.of(1, 2, 3))
                         .insert(4, 5)
                         .insertAll(4, IntList.of(97, 98, 99))
                         .remove(97)

@@ -29,8 +29,25 @@ class IntListTest {
 
 		@Example
 		void contains() {
+ 			assertThat(IntList.of(10, 20, 30).contains(20)).isTrue();
+ 			assertThat(IntList.of(10, 20, 30).contains(90)).isFalse();
+		}
 
+		@Example
+		void containsAll() {
+			assertThat(IntList.of(10, 20, 30).containsAll(IntList.of(10, 20, 30))).isTrue();
+			assertThat(IntList.of(10, 20, 30).containsAll(IntList.of(10, 20))).isTrue();
 
+			assertThat(IntList.of(10, 20, 30).containsAll(IntList.of(10, 20, 90))).isFalse();
+
+			assertThat(IntList.of(10, 20, 30).containsAll(IntList.of())).isTrue();
+		}
+
+		@Example
+		void containsAny() {
+			assertThat(IntList.of(10, 20, 30).containsAny(IntList.of(10, 20, 90))).isTrue();
+
+			assertThat(IntList.of(10, 20, 30).containsAny(IntList.of())).isFalse();
 		}
 
 		@Example
@@ -74,24 +91,24 @@ class IntListTest {
 		}
 
 		@Example
-		void add() {
-			assertThat(IntList.of(10, 20, 30).add(35)).isEqualTo(IntList.of(10, 20, 30, 35));
+		void append() {
+			assertThat(IntList.of(10, 20, 30).append(35)).isEqualTo(IntList.of(10, 20, 30, 35));
 		}
 
 		@Example
-		void addFirst() {
-			assertThat(IntList.of(10, 20, 30).addFirst(5)).isEqualTo(IntList.of(5, 10, 20, 30));
+		void prepend() {
+			assertThat(IntList.of(10, 20, 30).prepend(5)).isEqualTo(IntList.of(5, 10, 20, 30));
 		}
 
 		@Example
-		void addAll() {
-			assertThat(IntList.of(10, 20, 30).addAll(IntList.of(31, 32, 33))).isEqualTo(IntList.of(10, 20, 30, 31, 32, 33));
+		void appendAll() {
+			assertThat(IntList.of(10, 20, 30).appendAll(IntList.of(31, 32, 33))).isEqualTo(IntList.of(10, 20, 30, 31, 32, 33));
 		}
 
 		@Example
-		void addAllFirst() {
+		void prependAll() {
 			final IntList list = IntList.of(10, 20, 30);
-			assertThat(list.addAllFirst(IntList.of(1, 2, 3))).isEqualTo(IntList.of(1, 2, 3, 10, 20, 30));
+			assertThat(list.prependAll(IntList.of(1, 2, 3))).isEqualTo(IntList.of(1, 2, 3, 10, 20, 30));
 		}
 
 		@Example
@@ -110,21 +127,32 @@ class IntListTest {
 		}
 
 		@Example
+		void removeAt() {
+			final IntList list = IntList.of(10, 20, 30);
+			assertThat(list.removeAt(0)).isEqualTo(IntList.of(20, 30));
+			assertThat(list.removeAt(1)).isEqualTo(IntList.of(10, 30));
+			assertThat(list.removeAt(2)).isEqualTo(IntList.of(10, 20));
+		}
+
+		@Example
 		void map() {
-			assertThat(IntList.of(10, 20, 30).map(i -> i + 5)).isEqualTo(IntList.of(15, 25, 35));
+			final IntList actual = IntList.of(10, 20, 30)
+					.map(i -> i + 5);
+
+			assertThat(actual).isEqualTo(IntList.of(15, 25, 35));
+		}
+
+		@Example
+		void flatMap() {
+			final IntList actual = IntList.of(10, 20, 30)
+					.flatMap(i -> IntList.of(i + 1, i + 2, i + 3));
+
+			assertThat(actual).isEqualTo(IntList.of(11, 12, 13, 21, 22, 23, 31, 32, 33));
 		}
 
 		@Example
 		void filter() {
 			assertThat(IntList.of(-10, 10, -20, 20, -30, 30, -40).filter(i -> i > 0)).isEqualTo(IntList.of(10, 20, 30));
-		}
-
-		@Example
-		void delete() {
-			final IntList list = IntList.of(10, 20, 30);
-			assertThat(list.delete(0)).isEqualTo(IntList.of(20, 30));
-			assertThat(list.delete(1)).isEqualTo(IntList.of(10, 30));
-			assertThat(list.delete(2)).isEqualTo(IntList.of(10, 20));
 		}
 
 		@Example
@@ -175,12 +203,45 @@ class IntListTest {
 			assertThat(IntList.of(10, 20, 30).compareTo(IntList.of(10, 20))).isPositive();
 			assertThat(IntList.of(10, 20, 35).compareTo(IntList.of(10, 20, 30))).isPositive();
 		}
+
+		@Example
+		void range() {
+			assertThat(IntList.range(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4));
+			assertThat(IntList.range(1, 1)).isEqualTo(IntList.of());
+		}
+
+		@Example
+		void rangeClosed() {
+			assertThat(IntList.rangeClosed(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4, 5));
+			assertThat(IntList.rangeClosed(1, 1)).isEqualTo(IntList.of(1));
+			assertThat(IntList.rangeClosed(1, 0)).isEqualTo(IntList.of());
+		}
 	}
 
 	@Group
 	class Robustness {
 		@Property
-		void add(
+		void containsAll(
+				@ForAll("items") IntList a,
+				@ForAll("items") IntList b) {
+
+			final IntList l = a.appendAll(b);
+
+			assertThat(l.containsAll(a)).isTrue();
+			assertThat(l.containsAll(b)).isTrue();
+		}
+		@Property
+		void reverse(@ForAll("items") IntList a) {
+			final IntList l = a.toBuilder()
+					.reverse()
+					.reverse()
+					.build();
+
+			assertThat(l).isEqualTo(a);
+		}
+
+		@Property
+		void addAddFirst(
 				@ForAll("item") int a1,
 				@ForAll("item") int a2,
 				@ForAll("items") IntList b,
@@ -190,24 +251,24 @@ class IntListTest {
 				@ForAll @IntRange(min = 0, max = 10) int trail) {
 
 			final IntList l1 = b.toBuilder(lead, trail)
-					.addFirst(a2)
-					.addFirst(a1)
-					.add(c1)
-					.add(c2)
+					.prepend(a2)
+					.prepend(a1)
+					.append(c1)
+					.append(c2)
 					.build();
 
 			final IntList l2 = b.toBuilder(lead, trail)
-					.add(c1)
-					.add(c2)
-					.addFirst(a2)
-					.addFirst(a1)
+					.append(c1)
+					.append(c2)
+					.prepend(a2)
+					.prepend(a1)
 					.build();
 
 			assertThat(l1).isEqualTo(l2);
 		}
 
 		@Property
-		void addAll(
+		void addAllAddAllFirst(
 				@ForAll("items") IntList a,
 				@ForAll("items") IntList b,
 				@ForAll("items") IntList c,
@@ -215,13 +276,13 @@ class IntListTest {
 				@ForAll @IntRange(min = 0, max = 10) int trail) {
 
 			final IntList l1 = a.toBuilder(lead, trail)
-					.addAll(b)
-					.addAll(c)
+					.appendAll(b)
+					.appendAll(c)
 					.build();
 
 			final IntList l2 = c.toBuilder(lead, trail)
-					.addAllFirst(b)
-					.addAllFirst(a)
+					.prependAll(b)
+					.prependAll(a)
 					.build();
 
 			assertThat(l1).isEqualTo(l2);

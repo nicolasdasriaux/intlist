@@ -2,9 +2,9 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
@@ -87,15 +87,15 @@ public class IntList implements Comparable<IntList> {
     }
 
     public boolean contains(int value) {
-        return toBuilderNonLeaking().contains(value);
+        return toBuilderNonMutated().contains(value);
     }
 
     public boolean containsAll(IntList values) {
-        return toBuilderNonLeaking().containsAll(values);
+        return toBuilderNonMutated().containsAll(values);
     }
 
     public boolean containsAny(IntList values) {
-        return toBuilderNonLeaking().containsAny(values);
+        return toBuilderNonMutated().containsAny(values);
     }
 
     public IntList set(int index, int value) {
@@ -134,27 +134,27 @@ public class IntList implements Comparable<IntList> {
                 .buildNonLeaking();
     }
 
-    public IntList add(int value) {
+    public IntList append(int value) {
         return toBuilder(0, 1)
-                .add(value)
+                .append(value)
                 .buildNonLeaking();
     }
 
-    public IntList addAll(IntList values) {
+    public IntList appendAll(IntList values) {
         return toBuilder(0, values.array.length)
-                .addAll(values)
+                .appendAll(values)
                 .build();
     }
 
-    public IntList addFirst(int value) {
+    public IntList prepend(int value) {
         return toBuilder(1, 0)
-                .addFirst(value)
+                .prepend(value)
                 .build();
     }
 
-    public IntList addAllFirst(IntList values) {
+    public IntList prependAll(IntList values) {
         return toBuilder(values.array.length, 0)
-                .addAllFirst(values)
+                .prependAll(values)
                 .buildNonLeaking();
     }
 
@@ -176,9 +176,21 @@ public class IntList implements Comparable<IntList> {
                 .buildNonLeaking();
     }
 
+    public IntList removeAt(int index) {
+        return this.toBuilder()
+                .removeAt(index)
+                .buildNonLeaking();
+    }
+
     public IntList map(IntToIntFunction function) {
         return toBuilder()
                 .map(function)
+                .buildNonLeaking();
+    }
+
+    public IntList flatMap(IntFunction<IntList> function) {
+        return toBuilder()
+                .flatMap(function)
                 .buildNonLeaking();
     }
 
@@ -200,12 +212,6 @@ public class IntList implements Comparable<IntList> {
                 .buildNonLeaking();
     }
 
-    public IntList delete(int index) {
-        return this.toBuilder()
-                .delete(index)
-                .buildNonLeaking();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null) {
@@ -218,13 +224,13 @@ public class IntList implements Comparable<IntList> {
     }
 
     @Override
-    public String toString() {
-        return Arrays.toString(array);
+    public int hashCode() {
+        return Arrays.hashCode(array);
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(array);
+    public String toString() {
+        return Arrays.toString(array);
     }
 
     @Override
@@ -248,8 +254,8 @@ public class IntList implements Comparable<IntList> {
         return Builder.of(array);
     }
 
-    private Builder toBuilderNonLeaking() {
-        return Builder.ofNonLeaking(array);
+    private Builder toBuilderNonMutated() {
+        return Builder.ofNonMutated(array);
     }
 
     public Builder toBuilder(int lead, int trail) {
@@ -359,7 +365,7 @@ public class IntList implements Comparable<IntList> {
         }
 
         public boolean containsAny(IntList values) {
-            final Builder valuesBuilder = values.toBuilderNonLeaking();
+            final Builder valuesBuilder = values.toBuilderNonMutated();
 
             for (int i = start; i < end; i++) {
                 if (valuesBuilder.contains(buffer[i])) {
@@ -406,28 +412,28 @@ public class IntList implements Comparable<IntList> {
             return sort().reverse();
         }
 
-        public Builder add(int value) {
+        public Builder append(int value) {
             ensureTrailingCapacity(1);
             buffer[end] = value;
             end++;
             return this;
         }
 
-        public Builder addAll(IntList values) {
+        public Builder appendAll(IntList values) {
             ensureTrailingCapacity(values.array.length);
             System.arraycopy(values.array, 0, buffer, end, values.array.length);
             end += values.array.length;
             return this;
         }
 
-        public Builder addFirst(int value) {
+        public Builder prepend(int value) {
             ensureLeadingCapacity(1);
             buffer[start - 1] = value;
             start--;
             return this;
         }
 
-        public Builder addAllFirst(IntList values) {
+        public Builder prependAll(IntList values) {
             ensureLeadingCapacity(values.array.length);
             System.arraycopy(values.array, 0, buffer, start - values.array.length, values.array.length);
             start -= values.array.length;
@@ -435,7 +441,7 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder retainAll(IntList values) {
-            final Builder valuesBuilder = values.toBuilderNonLeaking();
+            final Builder valuesBuilder = values.toBuilderNonMutated();
             int j = start;
 
             for (int i = start; i < end; i++) {
@@ -470,7 +476,7 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder removeAll(IntList values) {
-            final Builder valuesBuilder = values.toBuilderNonLeaking();
+            final Builder valuesBuilder = values.toBuilderNonMutated();
             int j = start;
 
             for (int i = start; i < end; i++) {
@@ -487,12 +493,35 @@ public class IntList implements Comparable<IntList> {
             return this;
         }
 
+        public Builder removeAt(int index) {
+            if (index == 0) {
+                start++;
+            } else if (index == size() -1) {
+                end--;
+            } else {
+                System.arraycopy(buffer, start + index + 1, buffer, start + index, end - start - index - 1);
+                this.end--;
+            }
+            return this;
+        }
+
         public Builder map(IntToIntFunction function) {
             for (int i = start; i < end; i++) {
                 buffer[i] = function.apply(buffer[i]);
             }
 
             return this;
+        }
+
+
+        public Builder flatMap(IntFunction<IntList> function) {
+            final Builder result = Builder.empty(0, this.capacity()).debug("empty");
+
+            for (int i = start; i < end; i++) {
+                result.appendAll(function.apply(buffer[i])).debug("appendAll");
+            }
+
+            return reset(result);
         }
 
         public Builder filter(IntPredicate predicate) {
@@ -525,15 +554,10 @@ public class IntList implements Comparable<IntList> {
             return this;
         }
 
-        public Builder delete(int index) {
-            if (index == 0) {
-                start++;
-            } else if (index == size() -1) {
-                end--;
-            } else {
-                System.arraycopy(buffer, start + index + 1, buffer, start + index, end - start - index - 1);
-                this.end--;
-            }
+        private Builder reset(Builder builder) {
+            buffer = builder.buffer;
+            start = builder.start;
+            end = builder.end;
             return this;
         }
 
@@ -641,7 +665,7 @@ public class IntList implements Comparable<IntList> {
             return new Builder(array.clone(), 0, array.length);
         }
 
-        private static Builder ofNonLeaking(int[] array) {
+        private static Builder ofNonMutated(int[] array) {
             return new Builder(array, 0, array.length);
         }
 
@@ -662,7 +686,7 @@ public class IntList implements Comparable<IntList> {
         }
 
         public static Builder empty(int lead, int trail) {
-            return new Builder(new int[lead + trail], lead, trail);
+            return new Builder(new int[lead + trail], lead, lead);
         }
     }
 
