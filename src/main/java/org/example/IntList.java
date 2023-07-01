@@ -16,6 +16,27 @@ public class IntList implements Comparable<IntList> {
         this.array = array;
     }
 
+    public List<IntList> permutations() {
+        final int[] item = new int[array.length];
+        final List<IntList> items = new ArrayList<>();
+        permutationsLoop(array.length, array.length, 0, item, items);
+        return items;
+    }
+
+    private void permutationsLoop(int n, int nn, long indices, int[] item, List<IntList> items) {
+        if (nn == 0) {
+            items.add(IntList.of(item.clone()));
+        } else {
+            for (int i = 0; i < array.length; i++) {
+                item[n - nn] = array[i];
+
+                if ((indices & 1L << i) == 0) {
+                    permutationsLoop(n, nn - 1, indices | 1L << i, item, items);
+                }
+            }
+        }
+    }
+
     public List<IntList> combinations(int k) {
         final int[] item = new int[k];
         final List<IntList> items = new ArrayList<>();
@@ -56,27 +77,6 @@ public class IntList implements Comparable<IntList> {
         }
 
         return items;
-    }
-
-    public List<IntList> permutations() {
-        final int[] item = new int[array.length];
-        final List<IntList> items = new ArrayList<>();
-        permutationsLoop(array.length, array.length, 0, item, items);
-        return items;
-    }
-
-    private void permutationsLoop(int n, int nn, long indices, int[] item, List<IntList> items) {
-        if (nn == 0) {
-            items.add(IntList.of(item.clone()));
-        } else {
-            for (int i = 0; i < array.length; i++) {
-                item[n - nn] = array[i];
-
-                if ((indices & 1L << i) == 0) {
-                    permutationsLoop(n, nn - 1, indices | 1L << i, item, items);
-                }
-            }
-        }
     }
 
     public int size() {
@@ -554,10 +554,10 @@ public class IntList implements Comparable<IntList> {
 
 
         public Builder flatMap(IntFunction<IntList> function) {
-            final Builder result = Builder.empty(0, this.capacity()).debug("empty");
+            final Builder result = Builder.empty(0, this.capacity());
 
             for (int i = start; i < end; i++) {
-                result.appendAll(function.apply(buffer[i])).debug("appendAll");
+                result.appendAll(function.apply(buffer[i]));
             }
 
             return reset(result);
@@ -620,7 +620,7 @@ public class IntList implements Comparable<IntList> {
                         newLeadingCapacity = (newCapacity - size) / 2;
                     } while (required > newLeadingCapacity);
 
-                    int[] newBuffer = new int[newCapacity];
+                    final int[] newBuffer = new int[newCapacity];
                     System.arraycopy(buffer, start, newBuffer, newLeadingCapacity, size);
                     buffer = newBuffer;
                     start = newLeadingCapacity;
@@ -651,7 +651,7 @@ public class IntList implements Comparable<IntList> {
                         newTrailingCapacity = newCapacity - size - newLeadingCapacity;
                     } while (required > newTrailingCapacity);
 
-                    int[] newBuffer = new int[newCapacity];
+                    final int[] newBuffer = new int[newCapacity];
                     System.arraycopy(buffer, start, newBuffer, newLeadingCapacity, size);
                     buffer = newBuffer;
                     start = newLeadingCapacity;
