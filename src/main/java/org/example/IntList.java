@@ -3,6 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
@@ -89,6 +90,18 @@ public class IntList implements Comparable<IntList> {
     public IntList subList(int start, int end) {
         return toBuilder()
                 .subList(start, end)
+                .buildNonLeaking();
+    }
+
+    public IntList shuffle() {
+        return toBuilder()
+                .shuffle()
+                .buildNonLeaking();
+    }
+
+    public IntList shuffle(Random random) {
+        return toBuilder()
+                .shuffle(random)
                 .buildNonLeaking();
     }
 
@@ -316,9 +329,22 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder subList(int start, int end) {
-            int s = this.start;
-            this.start = s + start;
-            this.end = s + end;
+            final int currentStart = this.start;
+            this.start = currentStart + start;
+            this.end = currentStart + end;
+            return this;
+        }
+
+        public Builder shuffle() {
+            return shuffle(new Random());
+        }
+
+        public Builder shuffle(Random random) {
+            for (int i = start; i < end; i++) {
+                final int j = i + random.nextInt(end - i);
+                swap(i, j);
+            }
+
             return this;
         }
 

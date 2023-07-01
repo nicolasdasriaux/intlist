@@ -2,12 +2,15 @@ package org.example;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
+import net.jqwik.api.Assume;
 import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Group;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.IntRange;
+
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -65,6 +68,19 @@ class IntListTest {
 			assertThat(list.subList(0, 4)).isEqualTo(IntList.of(10, 20, 30, 40));
 			assertThat(list.subList(1, 5)).isEqualTo(IntList.of(20, 30, 40, 50));
 			assertThat(list.subList(0, 5)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+		}
+
+		@Property
+		void shuffle(
+				@ForAll("items") IntList list,
+				@ForAll Random random) {
+
+			final IntList shuffled = list.shuffle(random);
+			Assume.that(!shuffled.equals(list));
+
+			assertThat(shuffled.size()).isEqualTo(list.size());
+			assertThat(shuffled.containsAll(list)).isTrue();
+			assertThat(shuffled).isNotEqualTo(list);
 		}
 
 		@Example
