@@ -17,10 +17,16 @@ public class IntList implements Comparable<IntList> {
     }
 
     public List<IntList> permutations() {
-        final int[] item = new int[array.length];
-        final List<IntList> items = new ArrayList<>();
-        permutationsLoop(array.length, array.length, 0, item, items);
-        return items;
+        final int n = array.length;
+
+        if (n <= 1) {
+            return List.of(this);
+        } else {
+            final int[] item = new int[n];
+            final List<IntList> items = new ArrayList<>();
+            permutationsLoop(n, n, 0, item, items);
+            return items;
+        }
     }
 
     private void permutationsLoop(int n, int nn, long indices, int[] item, List<IntList> items) {
@@ -38,10 +44,18 @@ public class IntList implements Comparable<IntList> {
     }
 
     public List<IntList> combinations(int k) {
-        final int[] item = new int[k];
-        final List<IntList> items = new ArrayList<>();
-        combinationsLoop(k, k, 0, item, items);
-        return items;
+        final int n = array.length;
+
+        if (k == 0) {
+            return List.of(IntList.of());
+        } else if (k == n) {
+            return List.of(this);
+        } else {
+            final int[] item = new int[k];
+            final List<IntList> items = new ArrayList<>();
+            combinationsLoop(k, k, 0, item, items);
+            return items;
+        }
     }
 
     private void combinationsLoop(int k, int kk, int ii, int[] item, List<IntList> items) {
@@ -57,7 +71,7 @@ public class IntList implements Comparable<IntList> {
 
     public List<IntList> arrangements(int k) {
         final List<IntList> combinations = combinations(k);
-        final List<IntList> permutations = IntList.range(0, k).permutations();
+        final IntList[] permutations = computePermutationTable(k);
 
         final List<IntList> items = new ArrayList<>();
         final int[] item = new int[k];
@@ -65,8 +79,8 @@ public class IntList implements Comparable<IntList> {
         for (int c = 0; c < combinations.size(); c++) {
             int[] combination = combinations.get(c).array;
 
-            for (int p = 0; p < permutations.size(); p++) {
-                int[] permutation = permutations.get(p).array;
+            for (int p = 0; p < permutations.length; p++) {
+                int[] permutation = permutations[p].array;
 
                 for (int i = 0; i < permutation.length; i++) {
                     item[i] = combination[permutation[i]];
@@ -77,6 +91,10 @@ public class IntList implements Comparable<IntList> {
         }
 
         return items;
+    }
+
+    private static IntList[] computePermutationTable(int n) {
+        return IntList.range(0, n).permutations().toArray(new IntList[0]);
     }
 
     public int size() {

@@ -51,6 +51,24 @@ class IntListTest {
 		}
 
 		@Example
+		void permutations_n_1() {
+			final List<IntList> actual = IntList.of(5).permutations();
+
+			assertThat(actual).containsExactly(
+					IntList.of(5)
+			);
+		}
+
+		@Example
+		void permutations_n_0() {
+			final List<IntList> actual = IntList.of().permutations();
+
+			assertThat(actual).containsExactly(
+					IntList.of()
+			);
+		}
+
+		@Example
 		void combinations() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(3);
 
@@ -65,6 +83,33 @@ class IntListTest {
 					IntList.of(6, 7, 9),
 					IntList.of(6, 8, 9),
 					IntList.of(7, 8, 9)
+			);
+		}
+
+		@Example
+		void combinations_same_n_and_k() {
+			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(5);
+
+			assertThat(actual).containsExactly(
+					IntList.of(5, 6, 7, 8, 9)
+			);
+		}
+
+		@Example
+		void combinations_k_0() {
+			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(0);
+
+			assertThat(actual).containsExactly(
+					IntList.of()
+			);
+		}
+
+		@Example
+		void combinations_n_0() {
+			final List<IntList> actual = IntList.of().combinations(0);
+
+			assertThat(actual).containsExactly(
+					IntList.of()
 			);
 		}
 
