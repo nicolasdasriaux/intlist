@@ -17,10 +17,10 @@ import static org.assertj.core.api.Assertions.*;
 
 class IntListTest {
 	@Group
-	class Features {
+	class IntListFeatures {
 		@Example
 		void permutations() {
-			List<IntList> actual = IntList.of(5, 6, 7, 8).permutations();
+			final List<IntList> actual = IntList.of(5, 6, 7, 8).permutations();
 
 			assertThat(actual).containsExactly(
 					IntList.of(5, 6, 7, 8),
@@ -432,7 +432,20 @@ class IntListTest {
 	}
 
 	@Group
-	class Robustness {
+	class BuilderFeatures {
+		@Example
+		void _clone() {
+			final IntList.Builder builder = IntList.Builder.of(new int[5], 1, 4);
+
+			final IntList.Builder clone = builder.clone();
+			assertThat(clone.getBuffer()).isNotSameAs(builder.getBuffer());
+			assertThat(clone.getStart()).isEqualTo(builder.getStart());
+			assertThat(clone.getEnd()).isEqualTo(builder.getEnd());
+		}
+	}
+
+	@Group
+	class BuilderRobustness {
 		@Property
 		void containsAll(
 				@ForAll("items") IntList a,
