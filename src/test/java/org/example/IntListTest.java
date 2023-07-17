@@ -486,8 +486,8 @@ class IntListTest {
 				@ForAll("items") IntList a,
 				@ForAll("items") IntList b,
 				@ForAll("items") IntList c,
-				@ForAll @IntRange(min = 0, max = 10) int lead,
-				@ForAll @IntRange(min = 0, max = 10) int trail) {
+				@ForAll @IntRange(max = 10) int lead,
+				@ForAll @IntRange(max = 10) int trail) {
 
 			final IntList l1 = a.toBuilder(lead, trail)
 					.appendAll(b)
@@ -516,8 +516,8 @@ class IntListTest {
 	@Provide
 	Arbitrary<ActionChain<MirrorState>> actionChain(
 			@ForAll("items") IntList intList,
-			@ForAll @IntRange(min = 0, max = 10) int lead,
-			@ForAll @IntRange(min = 0, max = 10) int trail) {
+			@ForAll @IntRange(max = 10) int lead,
+			@ForAll @IntRange(max = 10) int trail) {
 
 		return ActionChain
 				.startWith(() -> {
