@@ -22,24 +22,26 @@ public class IntList implements Comparable<IntList> {
         if (n <= 1) {
             return List.of(this);
         } else {
-            final int[] item = new int[n];
+            final int[] item = array.clone();
             final List<IntList> items = new ArrayList<>();
-            permutationsLoop(n, n, 0, item, items);
+            permutationsLoop(n, item, items);
             return items;
         }
     }
 
-    private void permutationsLoop(int n, int nn, long indices, int[] item, List<IntList> items) {
-        if (nn == 0) {
+    private void permutationsLoop(int nn, int[] item, List<IntList> items) {
+        if (nn <= 1) {
             items.add(IntList.of(item.clone()));
         } else {
-            for (int i = 0; i < array.length; i++) {
-                item[n - nn] = array[i];
-
-                if ((indices & 1L << i) == 0) {
-                    permutationsLoop(n, nn - 1, indices | 1L << i, item, items);
-                }
+            for (int i = 0; i < nn - 1; i++) {
+                permutationsLoop(nn - 1, item, items);
+                final int j = nn % 2 == 0 ? i : 0;
+                final int temp = item[j];
+                item[j] = item[nn - 1];
+                item[nn - 1] = temp;
             }
+
+            permutationsLoop(nn - 1, item, items);
         }
     }
 
@@ -53,18 +55,20 @@ public class IntList implements Comparable<IntList> {
         } else {
             final int[] item = new int[k];
             final List<IntList> items = new ArrayList<>();
-            combinationsLoop(k, k, 0, item, items);
+            combinationsLoop(k, 0, 0, item, items);
             return items;
         }
     }
 
-    private void combinationsLoop(int k, int kk, int ii, int[] item, List<IntList> items) {
-        if (kk == 0) {
+    private void combinationsLoop(int k, int kk, int nn, int[] item, List<IntList> items) {
+        if (kk == k) {
             items.add(IntList.of(item.clone()));
         } else {
-            for (int i = ii; i < array.length; i++) {
-                item[k - kk] = array[i];
-                combinationsLoop(k, kk - 1, i + 1, item, items);
+            final int n = array.length;
+
+            for (int i = nn; i < n; i++) {
+                item[kk] = array[i];
+                combinationsLoop(k, kk + 1, i + 1, item, items);
             }
         }
     }
@@ -311,7 +315,7 @@ public class IntList implements Comparable<IntList> {
         return builder.build();
     }
 
-    public static class Builder implements Cloneable {
+    public static class Builder {
         private int[] buffer;
         private int start;
         private int end;
@@ -622,6 +626,16 @@ public class IntList implements Comparable<IntList> {
             return this;
         }
 
+        public Builder dropRight(int count) {
+            if (count < end - start) {
+                end -= count;
+            } else {
+                end = start;
+            }
+
+            return this;
+        }
+
         private Builder reset(Builder builder) {
             buffer = builder.buffer;
             start = builder.start;
@@ -711,10 +725,6 @@ public class IntList implements Comparable<IntList> {
                             size(),
                             freeCapacity()
                     );
-        }
-
-        public Builder clone() {
-            return new Builder(buffer.clone(), start, end);
         }
 
         public IntList build() {

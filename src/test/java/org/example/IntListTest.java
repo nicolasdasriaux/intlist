@@ -6,9 +6,11 @@ import net.jqwik.api.Assume;
 import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Group;
+import net.jqwik.api.Label;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.IntRange;
+import net.jqwik.api.state.ActionChain;
 
 import java.util.List;
 import java.util.Random;
@@ -22,7 +24,7 @@ class IntListTest {
 		void permutations() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8).permutations();
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of(5, 6, 7, 8),
 					IntList.of(5, 6, 8, 7),
 					IntList.of(5, 7, 6, 8),
@@ -72,7 +74,7 @@ class IntListTest {
 		void combinations() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(3);
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of(5, 6, 7),
 					IntList.of(5, 6, 8),
 					IntList.of(5, 6, 9),
@@ -90,7 +92,7 @@ class IntListTest {
 		void combinations_same_n_and_k() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(5);
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of(5, 6, 7, 8, 9)
 			);
 		}
@@ -99,7 +101,7 @@ class IntListTest {
 		void combinations_k_0() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).combinations(0);
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of()
 			);
 		}
@@ -108,7 +110,7 @@ class IntListTest {
 		void combinations_n_0() {
 			final List<IntList> actual = IntList.of().combinations(0);
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of()
 			);
 		}
@@ -117,7 +119,7 @@ class IntListTest {
 		void arrangements() {
 			final List<IntList> actual = IntList.of(5, 6, 7, 8, 9).arrangements(3);
 
-			assertThat(actual).containsExactly(
+			assertThat(actual).containsExactlyInAnyOrder(
 					IntList.of(5, 6, 7),
 					IntList.of(5, 7, 6),
 					IntList.of(6, 5, 7),
@@ -255,9 +257,7 @@ class IntListTest {
 			final IntList actual = list.shuffle(random);
 			Assume.that(!actual.equals(list));
 
-			assertThat(actual.size()).isEqualTo(list.size());
-			assertThat(actual.containsAll(list)).isTrue();
-			assertThat(actual).isNotEqualTo(list);
+			assertThat(actual.sort()).isEqualTo(list.sort());
 		}
 
 		@Example
@@ -405,16 +405,16 @@ class IntListTest {
 
 		@Example
 		void _toString() {
-			assertThat(IntList.of(10, 20, 30).toString()).isEqualTo("[10, 20, 30]");
+			assertThat(IntList.of(10, 20, 30)).hasToString("[10, 20, 30]");
 		}
 
 		@Example
 		void _compareTo() {
-			assertThat(IntList.of(10, 20, 30).compareTo(IntList.of(10, 20, 30))).isZero();
-			assertThat(IntList.of(10, 20).compareTo(IntList.of(10, 20, 30))).isNegative();
-			assertThat(IntList.of(10, 20, 30).compareTo(IntList.of(10, 20, 35))).isNegative();
-			assertThat(IntList.of(10, 20, 30).compareTo(IntList.of(10, 20))).isPositive();
-			assertThat(IntList.of(10, 20, 35).compareTo(IntList.of(10, 20, 30))).isPositive();
+			assertThat(IntList.of(10, 20, 30)).isEqualByComparingTo(IntList.of(10, 20, 30));
+			assertThat(IntList.of(10, 20)).isLessThan(IntList.of(10, 20, 30));
+			assertThat(IntList.of(10, 20, 30)).isLessThan(IntList.of(10, 20, 35));
+			assertThat(IntList.of(10, 20, 30)).isGreaterThan(IntList.of(10, 20));
+			assertThat(IntList.of(10, 20, 35)).isGreaterThan(IntList.of(10, 20, 30));
 		}
 
 		@Example
@@ -428,19 +428,6 @@ class IntListTest {
 			assertThat(IntList.rangeClosed(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4, 5));
 			assertThat(IntList.rangeClosed(1, 1)).isEqualTo(IntList.of(1));
 			assertThat(IntList.rangeClosed(1, 0)).isEqualTo(IntList.of());
-		}
-	}
-
-	@Group
-	class BuilderFeatures {
-		@Example
-		void _clone() {
-			final IntList.Builder builder = IntList.Builder.of(new int[5], 1, 4);
-
-			final IntList.Builder clone = builder.clone();
-			assertThat(clone.getBuffer()).isNotSameAs(builder.getBuffer());
-			assertThat(clone.getStart()).isEqualTo(builder.getStart());
-			assertThat(clone.getEnd()).isEqualTo(builder.getEnd());
 		}
 	}
 
@@ -474,8 +461,8 @@ class IntListTest {
 				@ForAll("items") IntList b,
 				@ForAll("item") int c1,
 				@ForAll("item") int c2,
-				@ForAll @IntRange(min = 0, max = 10) int lead,
-				@ForAll @IntRange(min = 0, max = 10) int trail) {
+				@ForAll @IntRange(max = 10) int lead,
+				@ForAll @IntRange(max = 10) int trail) {
 
 			final IntList l1 = b.toBuilder(lead, trail)
 					.prepend(a2)
@@ -514,6 +501,44 @@ class IntListTest {
 
 			assertThat(l1).isEqualTo(l2);
 		}
+	}
+
+	@Label("IntList.Builder should be consistent with IntList")
+	@Property(tries = 5000)
+	void consistency(@ForAll("actionChain") ActionChain<MirrorState> actionChain) {
+		actionChain
+				.withInvariant("mirror consistency", state -> {
+					assertThat(state.intListBuilder().build()).isEqualTo(state.intList());
+				})
+				.run();
+	}
+
+	@Provide
+	Arbitrary<ActionChain<MirrorState>> actionChain(
+			@ForAll("items") IntList intList,
+			@ForAll @IntRange(min = 0, max = 10) int lead,
+			@ForAll @IntRange(min = 0, max = 10) int trail) {
+
+		return ActionChain
+				.startWith(() -> {
+					final IntList.Builder intListBuilder = intList.toBuilder(lead, trail);
+					return new MirrorState(intListBuilder, intList);
+				})
+				.withAction(new MirrorState.SetAction())
+				.withAction(new MirrorState.SwapAction())
+				.withAction(new MirrorState.ReplaceAction())
+				.withAction(5, new MirrorState.AppendAction())
+				.withAction(3, new MirrorState.AppendAllAction())
+				.withAction(5, new MirrorState.PrependAction())
+				.withAction(3, new MirrorState.PrependAllAction())
+				.withAction(5, new MirrorState.InsertAction())
+				.withAction(3, new MirrorState.InsertAllAction())
+				.withAction(5,new MirrorState.RemoveAction())
+				.withAction(3, new MirrorState.RemoveAllAction())
+				.withAction(new MirrorState.RemoveAtAction())
+				.withAction(5, new MirrorState.MapAction())
+				.withAction(3, new MirrorState.FlatMapAction())
+				.withMaxTransformations(150);
 	}
 
 	@Provide
