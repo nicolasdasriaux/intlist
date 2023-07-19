@@ -205,6 +205,18 @@ public class IntList implements Comparable<IntList> {
                 .unsafeBuild();
     }
 
+    public IntList insert(int index, int value) {
+        return toBuilder(0, 1)
+                .insert(index, value)
+                .unsafeBuild();
+    }
+
+    public IntList insertAll(int index, IntList values) {
+        return this.toBuilder(0, values.array.length)
+                .insertAll(index, values)
+                .unsafeBuild();
+    }
+
     public IntList remove(int value) {
         return toBuilder()
                 .remove(value)
@@ -218,8 +230,32 @@ public class IntList implements Comparable<IntList> {
     }
 
     public IntList removeAt(int index) {
-        return this.toBuilder()
+        return toBuilder()
                 .removeAt(index)
+                .unsafeBuild();
+    }
+
+    public IntList take(int count) {
+        return toBuilder()
+                .take(count)
+                .unsafeBuild();
+    }
+
+    public IntList drop(int count) {
+        return toBuilder()
+                .drop(count)
+                .unsafeBuild();
+    }
+
+    public IntList takeRight(int count) {
+        return toBuilder()
+                .takeRight(count)
+                .unsafeBuild();
+    }
+
+    public IntList dropRight(int count) {
+        return toBuilder()
+                .dropRight(count)
                 .unsafeBuild();
     }
 
@@ -238,18 +274,6 @@ public class IntList implements Comparable<IntList> {
     public IntList filter(IntPredicate predicate) {
         return toBuilder()
                 .filter(predicate)
-                .unsafeBuild();
-    }
-
-    public IntList insert(int index, int value) {
-        return toBuilder(0, 1)
-                .insert(index, value)
-                .unsafeBuild();
-    }
-
-    public IntList insertAll(int index, IntList values) {
-        return this.toBuilder(0, values.array.length)
-                .insertAll(index, values)
                 .unsafeBuild();
     }
 
@@ -531,6 +555,22 @@ public class IntList implements Comparable<IntList> {
             return this;
         }
 
+        public Builder insert(int index, int value) {
+            ensureTrailingCapacity(1);
+            System.arraycopy(buffer, start + index, buffer, start + index + 1, end - start - index);
+            buffer[start + index] = value;
+            end++;
+            return this;
+        }
+
+        public Builder insertAll(int index, IntList values) {
+            ensureTrailingCapacity(values.array.length);
+            System.arraycopy(buffer, start + index, buffer, start + index + values.array.length, end - start - index);
+            System.arraycopy(values.array, 0, buffer, start + index, values.array.length);
+            end += values.array.length;
+            return this;
+        }
+
         public Builder remove(int value) {
             int j = start;
 
@@ -578,6 +618,42 @@ public class IntList implements Comparable<IntList> {
             return this;
         }
 
+        public Builder take(int count) {
+            if (count < end - start) {
+                end = start + count;
+            }
+
+            return this;
+        }
+
+        public Builder drop(int count) {
+            if (count < end - start) {
+                start += count;
+            } else {
+                start = end;
+            }
+
+            return this;
+        }
+
+        public Builder takeRight(int count) {
+            if (count < end - start) {
+                start = end - count;
+            }
+
+            return this;
+        }
+
+        public Builder dropRight(int count) {
+            if (count < end - start) {
+                end -= count;
+            } else {
+                end = start;
+            }
+
+            return this;
+        }
+
         public Builder map(IntToIntFunction function) {
             for (int i = start; i < end; i++) {
                 buffer[i] = function.apply(buffer[i]);
@@ -607,32 +683,6 @@ public class IntList implements Comparable<IntList> {
             }
 
             end = j;
-            return this;
-        }
-
-        public Builder insert(int index, int value) {
-            ensureTrailingCapacity(1);
-            System.arraycopy(buffer, start + index, buffer, start + index + 1, end - start - index);
-            buffer[start + index] = value;
-            end++;
-            return this;
-        }
-
-        public Builder insertAll(int index, IntList values) {
-            ensureTrailingCapacity(values.array.length);
-            System.arraycopy(buffer, start + index, buffer, start + index + values.array.length, end - start - index);
-            System.arraycopy(values.array, 0, buffer, start + index, values.array.length);
-            end += values.array.length;
-            return this;
-        }
-
-        public Builder dropRight(int count) {
-            if (count < end - start) {
-                end -= count;
-            } else {
-                end = start;
-            }
-
             return this;
         }
 

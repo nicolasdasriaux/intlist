@@ -127,6 +127,42 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		});
 	}
 
+	static Transformer<MirrorState> take(int count) {
+		return Transformer.transform("take", state -> {
+			return new MirrorState(
+					state.intListBuilder().take(count),
+					state.intList().take(count)
+			);
+		});
+	}
+
+	static Transformer<MirrorState> drop(int count) {
+		return Transformer.transform("drop", state -> {
+			return new MirrorState(
+					state.intListBuilder().drop(count),
+					state.intList().drop(count)
+			);
+		});
+	}
+
+	static Transformer<MirrorState> takeRight(int count) {
+		return Transformer.transform("takeRight", state -> {
+			return new MirrorState(
+					state.intListBuilder().takeRight(count),
+					state.intList().takeRight(count)
+			);
+		});
+	}
+
+	static Transformer<MirrorState> dropRight(int count) {
+		return Transformer.transform("dropRight", state -> {
+			return new MirrorState(
+					state.intListBuilder().dropRight(count),
+					state.intList().dropRight(count)
+			);
+		});
+	}
+
 	static Transformer<MirrorState> map(IntList.IntToIntFunction function) {
 		return Transformer.transform("map", state -> {
 			return new MirrorState(
@@ -340,6 +376,46 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
 			final Arbitrary<Integer> indexArbitrary = state.indexArbitrary();
 			return indexArbitrary.map(MirrorState::removeAt);
+		}
+	}
+
+	static class TakeAction implements DependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
+			final Arbitrary<Integer> countArbitrary = Arbitraries.integers()
+					.between(0, state.intList().size() + 1);
+
+			return countArbitrary.map(MirrorState::take);
+		}
+	}
+
+	static class DropAction implements DependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
+			final Arbitrary<Integer> countArbitrary = Arbitraries.integers()
+					.between(0, state.intList().size() + 1);
+
+			return countArbitrary.map(MirrorState::drop);
+		}
+	}
+
+	static class TakeRightAction implements DependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
+			final Arbitrary<Integer> countArbitrary = Arbitraries.integers()
+					.between(0, state.intList().size() + 1);
+
+			return countArbitrary.map(MirrorState::takeRight);
+		}
+	}
+
+	static class DropRightAction implements DependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
+			final Arbitrary<Integer> countArbitrary = Arbitraries.integers()
+					.between(0, state.intList().size() + 1);
+
+			return countArbitrary.map(MirrorState::dropRight);
 		}
 	}
 

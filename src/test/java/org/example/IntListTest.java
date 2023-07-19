@@ -325,6 +325,60 @@ class IntListTest {
 		}
 
 		@Example
+		void insert() {
+			final IntList list = IntList.of(10, 20, 30);
+			assertThat(list.insert(0, 5)).isEqualTo(IntList.of(5, 10, 20, 30));
+			assertThat(list.insert(1, 15)).isEqualTo(IntList.of(10, 15, 20, 30));
+			assertThat(list.insert(2, 25)).isEqualTo(IntList.of(10, 20, 25, 30));
+			assertThat(list.insert(3, 35)).isEqualTo(IntList.of(10, 20, 30, 35));
+		}
+
+		@Example
+		void insertAll() {
+			final IntList list = IntList.of(10, 20, 30);
+			assertThat(list.insertAll(0, IntList.of(1, 2, 3))).isEqualTo(IntList.of(1, 2, 3, 10, 20, 30));
+			assertThat(list.insertAll(1, IntList.of(11, 12, 13))).isEqualTo(IntList.of(10, 11, 12, 13, 20, 30));
+			assertThat(list.insertAll(2, IntList.of(21, 22, 23))).isEqualTo(IntList.of(10, 20, 21, 22, 23, 30));
+			assertThat(list.insertAll(3, IntList.of(31, 32, 33))).isEqualTo(IntList.of(10, 20, 30, 31, 32, 33));
+		}
+
+		@Example
+		void take() {
+			final IntList list = IntList.of(10, 20, 30, 40, 50);
+			assertThat(list.take(0)).isEqualTo(IntList.of());
+			assertThat(list.take(3)).isEqualTo(IntList.of(10, 20, 30));
+			assertThat(list.take(5)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+			assertThat(list.take(6)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+		}
+
+		@Example
+		void drop() {
+			final IntList list = IntList.of(10, 20, 30, 40, 50);
+			assertThat(list.drop(0)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+			assertThat(list.drop(3)).isEqualTo(IntList.of(40, 50));
+			assertThat(list.drop(5)).isEqualTo(IntList.of());
+			assertThat(list.drop(6)).isEqualTo(IntList.of());
+		}
+
+		@Example
+		void takeRight() {
+			final IntList list = IntList.of(10, 20, 30, 40, 50);
+			assertThat(list.takeRight(0)).isEqualTo(IntList.of());
+			assertThat(list.takeRight(3)).isEqualTo(IntList.of(30, 40, 50));
+			assertThat(list.takeRight(5)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+			assertThat(list.takeRight(6)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+		}
+
+		@Example
+		void dropRight() {
+			final IntList list = IntList.of(10, 20, 30, 40, 50);
+			assertThat(list.dropRight(0)).isEqualTo(IntList.of(10, 20, 30, 40, 50));
+			assertThat(list.dropRight(3)).isEqualTo(IntList.of(10, 20));
+			assertThat(list.dropRight(5)).isEqualTo(IntList.of());
+			assertThat(list.dropRight(6)).isEqualTo(IntList.of());
+		}
+
+		@Example
 		void remove() {
 			assertThat(IntList.of(10, 20, 30, 40).remove(30))
 					.isEqualTo(IntList.of(10, 20, 40));
@@ -366,24 +420,6 @@ class IntListTest {
 					.filter(i -> i > 0);
 
 			assertThat(actual).isEqualTo(IntList.of(10, 20, 30));
-		}
-
-		@Example
-		void insert() {
-			final IntList list = IntList.of(10, 20, 30);
-			assertThat(list.insert(0, 5)).isEqualTo(IntList.of(5, 10, 20, 30));
-			assertThat(list.insert(1, 15)).isEqualTo(IntList.of(10, 15, 20, 30));
-			assertThat(list.insert(2, 25)).isEqualTo(IntList.of(10, 20, 25, 30));
-			assertThat(list.insert(3, 35)).isEqualTo(IntList.of(10, 20, 30, 35));
-		}
-
-		@Example
-		void insertAll() {
-			final IntList list = IntList.of(10, 20, 30);
-			assertThat(list.insertAll(0, IntList.of(1, 2, 3))).isEqualTo(IntList.of(1, 2, 3, 10, 20, 30));
-			assertThat(list.insertAll(1, IntList.of(11, 12, 13))).isEqualTo(IntList.of(10, 11, 12, 13, 20, 30));
-			assertThat(list.insertAll(2, IntList.of(21, 22, 23))).isEqualTo(IntList.of(10, 20, 21, 22, 23, 30));
-			assertThat(list.insertAll(3, IntList.of(31, 32, 33))).isEqualTo(IntList.of(10, 20, 30, 31, 32, 33));
 		}
 
 		@Example
@@ -536,6 +572,10 @@ class IntListTest {
 				.withAction(5,new MirrorState.RemoveAction())
 				.withAction(3, new MirrorState.RemoveAllAction())
 				.withAction(new MirrorState.RemoveAtAction())
+				.withAction(new MirrorState.TakeAction())
+				.withAction(new MirrorState.DropAction())
+				.withAction(new MirrorState.TakeRightAction())
+				.withAction(new MirrorState.DropRightAction())
 				.withAction(5, new MirrorState.MapAction())
 				.withAction(3, new MirrorState.FlatMapAction())
 				.withMaxTransformations(150);
