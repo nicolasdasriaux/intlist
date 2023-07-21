@@ -379,6 +379,24 @@ class IntListTest {
 		}
 
 		@Example
+		void takeWhile() {
+			final IntList list = IntList.of(1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6);
+
+			assertThat(list.takeWhile(n -> n > 0)).isEqualTo(IntList.of(1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6));
+			assertThat(list.takeWhile(n -> n < 6)).isEqualTo(IntList.of(1, 2, 3, 4, 5));
+			assertThat(list.takeWhile(n -> n < 1)).isEqualTo(IntList.of());
+		}
+
+		@Example
+		void dropWhile() {
+			final IntList list = IntList.of(8, 9, 10, 11, 12, 13, -14, -15, -16, -17, -18, -19);
+
+			assertThat(list.dropWhile(n -> n < 0)).isEqualTo(IntList.of(8, 9, 10, 11, 12, 13, -14, -15, -16, -17, -18, -19));
+			assertThat(list.dropWhile(n -> n > 0)).isEqualTo(IntList.of(-14, -15, -16, -17, -18, -19));
+			assertThat(list.dropWhile(n -> n < Math.abs(20))).isEqualTo(IntList.of());
+		}
+
+		@Example
 		void remove() {
 			assertThat(IntList.of(10, 20, 30, 40).remove(30))
 					.isEqualTo(IntList.of(10, 20, 40));

@@ -259,6 +259,18 @@ public class IntList implements Comparable<IntList> {
                 .unsafeBuild();
     }
 
+    public IntList takeWhile(IntPredicate predicate) {
+        return toBuilder()
+                .takeWhile(predicate)
+                .unsafeBuild();
+    }
+
+    public IntList dropWhile(IntPredicate predicate) {
+        return toBuilder()
+                .dropWhile(predicate)
+                .unsafeBuild();
+    }
+
     public IntList map(IntToIntFunction function) {
         return toBuilder()
                 .map(function)
@@ -649,6 +661,34 @@ public class IntList implements Comparable<IntList> {
                 end -= count;
             } else {
                 end = start;
+            }
+
+            return this;
+        }
+
+        public Builder takeWhile(IntPredicate predicate) {
+            int i = start;
+
+            while (predicate.test(buffer[i]) && i < end) {
+                i++;
+                if (i == end) {
+                    return this;
+                }
+            }
+
+            end = i;
+            return this;
+        }
+
+        public Builder dropWhile(IntPredicate predicate) {
+            int i = start;
+
+            while (predicate.test(buffer[i]) && i < end) {
+                i++;
+                start = i;
+                if (i == end) {
+                    return this;
+                }
             }
 
             return this;
