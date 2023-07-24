@@ -578,6 +578,7 @@ class IntListTest {
 				.withAction(new MirrorState.DropRightAction())
 				.withAction(5, new MirrorState.MapAction())
 				.withAction(3, new MirrorState.FlatMapAction())
+				.withAction(new MirrorState.FilterAction())
 				.withMaxTransformations(150);
 	}
 

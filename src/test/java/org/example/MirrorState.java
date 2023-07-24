@@ -9,6 +9,7 @@ import net.jqwik.api.state.Action;
 import net.jqwik.api.state.Transformer;
 
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
 
 record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	boolean isNonEmpty() {
@@ -177,6 +178,15 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 			return new MirrorState(
 					state.intListBuilder().flatMap(function),
 					state.intList().flatMap(function)
+			);
+		});
+	}
+
+	static Transformer<MirrorState> filter(IntPredicate predicate) {
+		return Transformer.transform("filter", state -> {
+			return new MirrorState(
+					state.intListBuilder().filter(predicate),
+					state.intList().filter(predicate)
 			);
 		});
 	}
@@ -435,8 +445,18 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 
 		@Override
 		public Arbitrary<Transformer<MirrorState>> transformer() {
-			final Arbitrary<IntFunction<IntList>> intToIntListFunctionArbitrary = Functions.function(IntFunction.class).returning(intListArbitrary(valueArbitrary(), 5));
+			final Arbitrary<IntList> intListArbitrary = intListArbitrary(valueArbitrary(), 5);
+			final Arbitrary<IntFunction<IntList>> intToIntListFunctionArbitrary = Functions.function(IntFunction.class).returning(intListArbitrary);
 			return intToIntListFunctionArbitrary.map(MirrorState::flatMap);
+		}
+	}
+
+	public static class FilterAction implements IndependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer() {
+			final Arbitrary<Boolean> booleanArbitrary = Arbitraries.integers().between(1, 10).map(i -> i <= 3);
+			final Arbitrary<IntPredicate> predicateArbitrary = Functions.function(IntPredicate.class).returning(booleanArbitrary);
+			return predicateArbitrary.map(MirrorState::filter);
 		}
 	}
 }
