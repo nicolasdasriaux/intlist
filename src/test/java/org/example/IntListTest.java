@@ -535,6 +535,8 @@ class IntListTest {
                         final IntList.Builder intListBuilder = intList.toBuilder(lead, trail);
                         return new MirrorState(intListBuilder, intList);
                     })
+                    .withAction(new MirrorState.SizeAction())
+                    .withAction(new MirrorState.GetAction())
                     .withAction(new MirrorState.ShuffleAction())
                     .withAction(new MirrorState.SetAction())
                     .withAction(new MirrorState.SwapAction())

@@ -7,11 +7,14 @@ import net.jqwik.api.Functions;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.state.Action;
 import net.jqwik.api.state.Transformer;
+import org.assertj.core.api.Assertions;
 
 import java.util.Random;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.*;
 
 record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	boolean isNonEmpty() {
@@ -22,6 +25,23 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		return intList.size() < 500;
 	}
 
+	static Transformer<MirrorState> size() {
+		return Transformer.transform("size", state -> {
+			assertThat(state.intListBuilder().size())
+					.isEqualTo(state.intList().size());
+
+			return state;
+		});
+	}
+
+	static Transformer<MirrorState> get(int index) {
+		return Transformer.transform("get", state -> {
+			assertThat(state.intListBuilder().get(index))
+					.isEqualTo(state.intList().get(index));
+
+			return state;
+		});
+	}
 
 	static Transformer<MirrorState> shuffle(Supplier<Random> randomSupplier) {
 		return Transformer.transform("shuffle", state -> {
@@ -229,6 +249,26 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	}
 
 	interface DependentAction extends Action.Dependent<MirrorState> {
+	}
+
+	static class SizeAction implements IndependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer() {
+			return Arbitraries.of(MirrorState.size());
+		}
+	}
+
+	static class GetAction implements DependentAction {
+		@Override
+		public boolean precondition(MirrorState state) {
+			return state.isNonEmpty();
+		}
+
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer(MirrorState state) {
+			final Arbitrary<Integer> indexArbitrary = state.indexArbitrary();
+			return indexArbitrary.map(MirrorState::get);
+		}
 	}
 
 	static class ShuffleAction implements IndependentAction {
