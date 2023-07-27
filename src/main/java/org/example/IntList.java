@@ -669,11 +669,8 @@ public class IntList implements Comparable<IntList> {
         public Builder takeWhile(IntPredicate predicate) {
             int i = start;
 
-            while (predicate.test(buffer[i]) && i < end) {
+            while (i < end && predicate.test(buffer[i])) {
                 i++;
-                if (i == end) {
-                    return this;
-                }
             }
 
             end = i;
@@ -683,14 +680,11 @@ public class IntList implements Comparable<IntList> {
         public Builder dropWhile(IntPredicate predicate) {
             int i = start;
 
-            while (predicate.test(buffer[i]) && i < end) {
+            while (i < end && predicate.test(buffer[i])) {
                 i++;
-                start = i;
-                if (i == end) {
-                    return this;
-                }
             }
 
+            start = i;
             return this;
         }
 
