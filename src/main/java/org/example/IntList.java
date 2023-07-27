@@ -86,7 +86,7 @@ public class IntList implements Comparable<IntList> {
             for (int p = 0; p < permutations.length; p++) {
                 int[] permutation = permutations[p].array;
 
-                for (int i = 0; i < permutation.length; i++) {
+                for (int i = 0; i < k; i++) {
                     item[i] = combination[permutation[i]];
                 }
 
