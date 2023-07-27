@@ -8,8 +8,10 @@ import net.jqwik.api.Tuple;
 import net.jqwik.api.state.Action;
 import net.jqwik.api.state.Transformer;
 
+import java.util.Random;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
+import java.util.function.Supplier;
 
 record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	boolean isNonEmpty() {
@@ -18,6 +20,16 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 
 	boolean isReasonablySized() {
 		return intList.size() < 500;
+	}
+
+
+	static Transformer<MirrorState> shuffle(Supplier<Random> randomSupplier) {
+		return Transformer.transform("shuffle", state -> {
+			return new MirrorState(
+					state.intListBuilder().shuffle(randomSupplier.get()),
+					state.intList().shuffle(randomSupplier.get())
+			);
+		});
 	}
 
 	static Transformer<MirrorState> set(int index, int value) {
@@ -217,6 +229,16 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	}
 
 	interface DependentAction extends Action.Dependent<MirrorState> {
+	}
+
+	static class ShuffleAction implements IndependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer() {
+			final Arbitrary<Supplier<Random>> randomSupplierArbitrary = Arbitraries.integers()
+					.map(seed -> () -> new Random(seed));
+
+			return randomSupplierArbitrary.map(MirrorState::shuffle);
+		}
 	}
 
 	static class SetAction implements DependentAction {

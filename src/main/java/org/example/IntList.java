@@ -398,8 +398,10 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder shuffle(Random random) {
-            for (int i = start; i < end; i++) {
-                final int j = i + random.nextInt(end - i);
+            final int size = end - start;
+
+            for (int i = 0; i < size; i++) {
+                final int j = i + random.nextInt(size - i);
                 swap(i, j);
             }
 
