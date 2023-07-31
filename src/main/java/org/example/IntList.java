@@ -86,7 +86,7 @@ public class IntList implements Comparable<IntList> {
             for (int p = 0; p < permutations.length; p++) {
                 int[] permutation = permutations[p].array;
 
-                for (int i = 0; i < permutation.length; i++) {
+                for (int i = 0; i < k; i++) {
                     item[i] = combination[permutation[i]];
                 }
 
@@ -410,8 +410,10 @@ public class IntList implements Comparable<IntList> {
         }
 
         public Builder shuffle(Random random) {
-            for (int i = start; i < end; i++) {
-                final int j = i + random.nextInt(end - i);
+            final int size = end - start;
+
+            for (int i = 0; i < size; i++) {
+                final int j = i + random.nextInt(size - i);
                 swap(i, j);
             }
 
