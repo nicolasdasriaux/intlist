@@ -3,7 +3,7 @@
 A library for efficient integer lists
 and a laboratory for collections of primitive types
 
-## Design goals
+## Design Goals
 
 * Offer a developer friendly API
 * Offer Immutable design as first intent
@@ -106,3 +106,23 @@ public class IntList {
     }
 }
 ```
+
+## Testing Strategy
+
+Using **jqwik**, a property-based testing library
+
+### Immutable `IntList`
+
+* Example-based testing 
+* Property-based testing
+
+### Mutable `IntList.Builder`
+
+* Statefull property-based testing to check consistency of mirrored method chains on both immutable and mutable implementations
+
+## Performance Testing Strategy
+
+Using **JMH** (Java Microbenchmark Harness)
+
+* Benchmark for features
+* Benchmark against low level array libraries such as **Apache Commons**
