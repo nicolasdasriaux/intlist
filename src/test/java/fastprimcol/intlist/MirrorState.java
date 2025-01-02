@@ -1,4 +1,4 @@
-package org.example;
+package fastprimcol.intlist;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
@@ -7,14 +7,13 @@ import net.jqwik.api.Functions;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.state.Action;
 import net.jqwik.api.state.Transformer;
-import org.assertj.core.api.Assertions;
 
 import java.util.Random;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 	boolean isNonEmpty() {

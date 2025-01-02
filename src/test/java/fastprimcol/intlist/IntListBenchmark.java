@@ -1,4 +1,4 @@
-package org.example;
+package fastprimcol.intlist;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.openjdk.jmh.annotations.Benchmark;

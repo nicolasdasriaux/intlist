@@ -1,4 +1,4 @@
-# Hayaku
+# IntList
 
 A library for efficient integer lists
 and a laboratory for collections of primitive types
@@ -49,4 +49,60 @@ final IntList modifiedNumbers = numbers.toBuilder() // Returns a new mutable bui
         .prependAll(IntList.of(1, 2, 3)) // Performs changes in-place on the mutable builder
         .map(i -> i * 10) // Performs changes in-place on the mutable builder
         .build(); // Returns a new immutable instance
+```
+
+### Mirrored immutable and mutable API
+
+General principle is that the implementations for methods reside in `IntList.Builder`.
+Most methods in `IntList` only delegate to the corresponding methods on `IntList.Builder`.
+
+#### Transformation methods
+
+A **transformation** method applies a transformation on an immutable `IntList`
+and returns the result of this transformation as another immutable `IntList`.
+
+The mirror method on `IntList.Builder` performs the same transformation
+by mutating the targeted mutable builder and returns the exact same builder it has just mutated.
+
+```java 
+public class IntList {
+    public IntList set(int index, int value) {
+        return toBuilder() // Create a mutable builder from this immutable IntList
+                .set(index, value) // Let the builder perform the transformation on itself
+                .unsafeBuild(); // Create an immutable IntList from this mutable builder
+    }
+
+    public static class Builder {
+        public Builder set(int index, int value) {
+            // Actual implementation
+            // This is where the transformation is actually performed by mutating this mutable builder.
+            return this; // Return this builder
+        }
+    }
+}
+```
+
+#### Query methods
+
+A **query** method computes a value after an immutable `IntList`
+and returns this result as an immutable value.
+
+The mirror method on `IntList.Builder` performs the same computation but after the mutable builder
+and returns this result as an immutable value.
+Though mutable, the builder is never mutated by a query method.
+
+```java
+public class IntList {
+    public boolean contains(int value) {
+        return unsafeToBuilder() // Create a mutable builder from this immutable IntList
+                .contains(value); // Let the builder perform the computation and return the result
+    }
+    
+    public static class Builder {
+        public boolean contains(int value) {
+            // Actual implementation
+            // This is where the computation is actually performed 
+        }
+    }
+}
 ```

@@ -1,4 +1,4 @@
-package org.example;
+package fastprimcol.intlist;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,15 +128,18 @@ public class IntList implements Comparable<IntList> {
     }
 
     public boolean contains(int value) {
-        return unsafeToBuilder().contains(value);
+        return unsafeToBuilder()
+                .contains(value);
     }
 
     public boolean containsAll(IntList values) {
-        return unsafeToBuilder().containsAll(values);
+        return unsafeToBuilder()
+                .containsAll(values);
     }
 
     public boolean containsAny(IntList values) {
-        return unsafeToBuilder().containsAny(values);
+        return unsafeToBuilder()
+                .containsAny(values);
     }
 
     public IntList set(int index, int value) {
@@ -184,13 +187,13 @@ public class IntList implements Comparable<IntList> {
     public IntList appendAll(IntList values) {
         return toBuilder(0, values.array.length)
                 .appendAll(values)
-                .build();
+                .unsafeBuild();
     }
 
     public IntList prepend(int value) {
         return toBuilder(1, 0)
                 .prepend(value)
-                .build();
+                .unsafeBuild();
     }
 
     public IntList prependAll(IntList values) {
@@ -319,24 +322,28 @@ public class IntList implements Comparable<IntList> {
         return Builder.of(array);
     }
 
-    private Builder unsafeToBuilder() {
-        return Builder.unsafeOf(array);
-    }
-
     public Builder toBuilder(int lead, int trail) {
         return Builder.of(array, lead, trail);
     }
 
-    public IntList build(Consumer<Builder> consumer) {
-        final Builder builder = toBuilder();
-        consumer.accept(builder);
-        return builder.build();
+    private Builder unsafeToBuilder() {
+        return Builder.unsafeOf(array);
     }
 
-    public IntList build(int lead, int trail, Consumer<Builder> consumer) {
+    public IntList modify(int lead, int trail, Consumer<Builder> consumer) {
         final Builder builder = toBuilder(lead, trail);
         consumer.accept(builder);
-        return builder.build();
+        return builder.unsafeBuild();
+    }
+
+    public static Builder builder(int lead, int trail) {
+        return Builder.empty(lead, trail);
+    }
+
+    public static IntList build(int lead, int trail, Consumer<Builder> consumer) {
+        final Builder builder = builder(lead, trail);
+        consumer.accept(builder);
+        return builder.unsafeBuild();
     }
 
     public static class Builder {
@@ -758,7 +765,7 @@ public class IntList implements Comparable<IntList> {
         public Builder debug(String msg) {
             Arrays.fill(buffer, 0, start, 0);
             Arrays.fill(buffer, end, buffer.length, 0);
-            System.out.println("[%s] ---> %s".formatted(msg, this));
+            System.out.printf("[%s] ---> %s%n", msg, this);
             return this;
         }
 
@@ -799,24 +806,14 @@ public class IntList implements Comparable<IntList> {
             return new Builder(array.clone(), 0, array.length);
         }
 
-        private static Builder unsafeOf(int[] array) {
-            return new Builder(array, 0, array.length);
-        }
-
-        public static Builder of(int[] array, int capacity) {
-            final int[] buffer = new int[capacity];
-            System.arraycopy(array, 0, buffer, (capacity - array.length) / 2, array.length);
-            return new Builder(buffer, 0, array.length);
-        }
-
         public static Builder of(int[] array, int lead, int trail) {
             final int[] buffer = new int[lead + array.length + trail];
             System.arraycopy(array, 0, buffer, lead, array.length);
             return new Builder(buffer, lead, lead + array.length);
         }
 
-        public static Builder empty(int initialCapacity) {
-            return new Builder(new int[initialCapacity], initialCapacity / 2, initialCapacity / 2);
+        private static Builder unsafeOf(int[] array) {
+            return new Builder(array, 0, array.length);
         }
 
         public static Builder empty(int lead, int trail) {

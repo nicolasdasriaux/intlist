@@ -1,4 +1,4 @@
-package org.example;
+package fastprimcol.intlist;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
