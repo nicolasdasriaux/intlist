@@ -195,6 +195,24 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		});
 	}
 
+	static Transformer<MirrorState> takeWhile(IntPredicate predicate) {
+		return Transformer.transform("takeWhile", state -> {
+			return new MirrorState(
+					state.intListBuilder().takeWhile(predicate),
+					state.intList().takeWhile(predicate)
+			);
+		});
+	}
+
+	static Transformer<MirrorState> dropWhile(IntPredicate predicate) {
+		return Transformer.transform("dropWhile", state -> {
+			return new MirrorState(
+					state.intListBuilder().dropWhile(predicate),
+					state.intList().dropWhile(predicate)
+			);
+		});
+	}
+
 	static Transformer<MirrorState> map(IntList.IntToIntFunction function) {
 		return Transformer.transform("map", state -> {
 			return new MirrorState(
@@ -490,7 +508,25 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		}
 	}
 
-	public static class MapAction implements IndependentAction {
+	static class TakeWhileAction implements IndependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer() {
+			final Arbitrary<Boolean> booleanArbitrary = Arbitraries.integers().map(i -> i > 0);
+			Arbitrary<IntPredicate> intPredicateArbitrary = Functions.function(IntPredicate.class).returning(booleanArbitrary);
+			return intPredicateArbitrary.map(MirrorState::takeWhile);
+		}
+	}
+
+	static class DropWhileAction implements IndependentAction {
+		@Override
+		public Arbitrary<Transformer<MirrorState>> transformer() {
+			final Arbitrary<Boolean> booleanArbitrary = Arbitraries.integers().map(i -> i > 0);
+			Arbitrary<IntPredicate> intPredicateArbitrary = Functions.function(IntPredicate.class).returning(booleanArbitrary);
+			return intPredicateArbitrary.map(MirrorState::dropWhile);
+		}
+	}
+
+	static class MapAction implements IndependentAction {
 		@Override
 		public Arbitrary<Transformer<MirrorState>> transformer() {
 			final Arbitrary<IntList.IntToIntFunction> intToIntFunctionArbitrary = Functions.function(IntList.IntToIntFunction.class).returning(valueArbitrary());
@@ -498,7 +534,7 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		}
 	}
 
-	public static class FlatMapAction implements IndependentAction {
+	static class FlatMapAction implements IndependentAction {
 		@Override
 		public boolean precondition(MirrorState state) {
 			return state.isReasonablySized();
@@ -512,7 +548,7 @@ record MirrorState(IntList.Builder intListBuilder, IntList intList) {
 		}
 	}
 
-	public static class FilterAction implements IndependentAction {
+	static class FilterAction implements IndependentAction {
 		@Override
 		public Arbitrary<Transformer<MirrorState>> transformer() {
 			final Arbitrary<Boolean> booleanArbitrary = Arbitraries.integers().between(1, 10).map(i -> i <= 3);

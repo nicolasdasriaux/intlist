@@ -7,9 +7,12 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class IntList implements Comparable<IntList> {
+    private static final IntList EMPTY = new IntList(new int[0]);
+
     private final int[] array;
 
     private IntList(int[] array) {
@@ -31,7 +34,7 @@ public class IntList implements Comparable<IntList> {
 
     private void permutationsLoop(int nn, int[] item, List<IntList> items) {
         if (nn <= 1) {
-            items.add(IntList.of(item.clone()));
+            items.add(IntList.of(item));
         } else {
             for (int i = 0; i < nn - 1; i++) {
                 permutationsLoop(nn - 1, item, items);
@@ -62,7 +65,7 @@ public class IntList implements Comparable<IntList> {
 
     private void combinationsLoop(int k, int kk, int nn, int[] item, List<IntList> items) {
         if (kk == k) {
-            items.add(IntList.of(item.clone()));
+            items.add(IntList.of(item));
         } else {
             final int n = array.length;
 
@@ -90,7 +93,7 @@ public class IntList implements Comparable<IntList> {
                     item[i] = combination[permutation[i]];
                 }
 
-                items.add(IntList.of(item.clone()));
+                items.add(IntList.of(item));
             }
         }
 
@@ -262,6 +265,18 @@ public class IntList implements Comparable<IntList> {
                 .unsafeBuild();
     }
 
+    public IntList takeWhile(IntPredicate predicate) {
+        return toBuilder()
+                .takeWhile(predicate)
+                .unsafeBuild();
+    }
+
+    public IntList dropWhile(IntPredicate predicate) {
+        return toBuilder()
+                .dropWhile(predicate)
+                .unsafeBuild();
+    }
+
     public IntList map(IntToIntFunction function) {
         return toBuilder()
                 .map(function)
@@ -278,6 +293,24 @@ public class IntList implements Comparable<IntList> {
         return toBuilder()
                 .filter(predicate)
                 .unsafeBuild();
+    }
+
+    public IntStream stream() {
+        return Arrays.stream(array);
+    }
+
+    public List<Integer> toList() {
+        return Arrays.stream(array)
+                .boxed()
+                .collect(Collectors.toList());
+    }
+
+    public int[] toArray() {
+        return array.clone();
+    }
+
+    public int[] unsafeToArray() {
+        return array;
     }
 
     @Override
@@ -302,20 +335,48 @@ public class IntList implements Comparable<IntList> {
     }
 
     @Override
-    public int compareTo(IntList o) {
-        return Arrays.compare(array, o.array);
+    public int compareTo(IntList other) {
+        return Arrays.compare(array, other.array);
+    }
+
+    public static IntList of() {
+        return EMPTY;
+    }
+
+    public static IntList of(int v1) {
+        return new IntList(new int[]{v1});
+    }
+
+    public static IntList of(int v1, int v2) {
+        return new IntList(new int[]{v1, v2});
+    }
+
+    public static IntList of(int v1, int v2, int v3) {
+        return new IntList(new int[]{v1, v2, v3});
+    }
+
+    public static IntList of(int v1, int v2, int v3, int v4) {
+        return new IntList(new int[]{v1, v2, v3, v4});
+    }
+
+    public static IntList of(int v1, int v2, int v3, int v4, int v5) {
+        return new IntList(new int[]{v1, v2, v3, v4, v5});
     }
 
     public static IntList of(int... array) {
+        return new IntList(array.clone());
+    }
+
+    public static IntList unsafeOf(int... array) {
         return new IntList(array);
     }
 
     public static IntList range(int startInclusive, int endExclusive) {
-        return IntList.of(IntStream.range(startInclusive, endExclusive).toArray());
+        return IntList.unsafeOf(IntStream.range(startInclusive, endExclusive).toArray());
     }
 
     public static IntList rangeClosed(int startInclusive, int endInclusive) {
-        return IntList.of(IntStream.rangeClosed(startInclusive, endInclusive).toArray());
+        return IntList.unsafeOf(IntStream.rangeClosed(startInclusive, endInclusive).toArray());
     }
 
     public Builder toBuilder() {
@@ -328,6 +389,12 @@ public class IntList implements Comparable<IntList> {
 
     private Builder unsafeToBuilder() {
         return Builder.unsafeOf(array);
+    }
+
+    public IntList modify(Consumer<Builder> consumer) {
+        final Builder builder = toBuilder();
+        consumer.accept(builder);
+        return builder.unsafeBuild();
     }
 
     public IntList modify(int lead, int trail, Consumer<Builder> consumer) {
@@ -355,18 +422,6 @@ public class IntList implements Comparable<IntList> {
             this.buffer = buffer;
             this.start = start;
             this.end = end;
-        }
-
-        protected int[] getBuffer() {
-            return buffer;
-        }
-
-        protected int getStart() {
-            return start;
-        }
-
-        protected int getEnd() {
-            return end;
         }
 
         public int size() {
@@ -618,7 +673,7 @@ public class IntList implements Comparable<IntList> {
         public Builder removeAt(int index) {
             if (index == 0) {
                 start++;
-            } else if (index == size() -1) {
+            } else if (index == size() - 1) {
                 end--;
             } else {
                 System.arraycopy(buffer, start + index + 1, buffer, start + index, end - start - index - 1);
@@ -660,6 +715,28 @@ public class IntList implements Comparable<IntList> {
                 end = start;
             }
 
+            return this;
+        }
+
+        public Builder takeWhile(IntPredicate predicate) {
+            int i = start;
+
+            while (i < end && predicate.test(buffer[i])) {
+                i++;
+            }
+
+            end = i;
+            return this;
+        }
+
+        public Builder dropWhile(IntPredicate predicate) {
+            int i = start;
+
+            while (i < end && predicate.test(buffer[i])) {
+                i++;
+            }
+
+            start = i;
             return this;
         }
 
@@ -788,17 +865,17 @@ public class IntList implements Comparable<IntList> {
 
         public IntList build() {
             if (start == 0 && end == buffer.length) {
-                return IntList.of(buffer.clone());
+                return IntList.of(buffer);
             } else {
-                return IntList.of(Arrays.copyOfRange(buffer, start, end));
+                return IntList.unsafeOf(Arrays.copyOfRange(buffer, start, end));
             }
         }
 
         private IntList unsafeBuild() {
             if (start == 0 && end == buffer.length) {
-                return IntList.of(buffer);
+                return IntList.unsafeOf(buffer);
             } else {
-                return IntList.of(Arrays.copyOfRange(buffer, start, end));
+                return IntList.unsafeOf(Arrays.copyOfRange(buffer, start, end));
             }
         }
 

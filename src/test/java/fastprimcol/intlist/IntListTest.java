@@ -14,8 +14,9 @@ import net.jqwik.api.state.ActionChain;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.IntPredicate;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class IntListTest {
     @Group
@@ -379,6 +380,22 @@ class IntListTest {
         }
 
         @Example
+        void takeWhile() {
+            final IntPredicate positive = i -> i > 0;
+            assertThat(IntList.of(10, 20, 30, -40, -50, -60).takeWhile(positive)).isEqualTo(IntList.of(10, 20, 30));
+            assertThat(IntList.of(10, 20, 30).takeWhile(positive)).isEqualTo(IntList.of(10, 20, 30));
+            assertThat(IntList.of(-40, -50, -60).takeWhile(positive)).isEqualTo(IntList.of());
+        }
+
+        @Example
+        void dropWhile() {
+            final IntPredicate negative = i -> i < 0;
+            assertThat(IntList.of(-30, -20, -10, 10, 20, 30).dropWhile(negative)).isEqualTo(IntList.of(10, 20, 30));
+            assertThat(IntList.of(10, 20, 30).dropWhile(negative)).isEqualTo(IntList.of(10, 20, 30));
+            assertThat(IntList.of(-30, -20, -10).dropWhile(negative)).isEqualTo(IntList.of());
+        }
+
+        @Example
         void remove() {
             assertThat(IntList.of(10, 20, 30, 40).remove(30))
                     .isEqualTo(IntList.of(10, 20, 40));
@@ -423,6 +440,34 @@ class IntListTest {
         }
 
         @Example
+        void range() {
+            assertThat(IntList.range(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4));
+            assertThat(IntList.range(1, 1)).isEqualTo(IntList.of());
+        }
+
+        @Example
+        void rangeClosed() {
+            assertThat(IntList.rangeClosed(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4, 5));
+            assertThat(IntList.rangeClosed(1, 1)).isEqualTo(IntList.of(1));
+            assertThat(IntList.rangeClosed(1, 0)).isEqualTo(IntList.of());
+        }
+
+        @Example
+        void toList() {
+            assertThat(IntList.of(1, 2, 3, 4).toList()).isEqualTo(List.of(1, 2, 3, 4));
+        }
+
+        @Example
+        void toArray() {
+            assertThat(IntList.of(1, 2, 3, 4).toArray()).isEqualTo(new int[]{1, 2, 3, 4});
+        }
+
+        @Example
+        void stream() {
+            assertThat(IntList.of(1, 2, 3, 4).stream()).containsExactly(1, 2, 3, 4);
+        }
+
+        @Example
         void equals() {
             assertThat(IntList.of(10, 20, 30)).isEqualTo(IntList.of(10, 20, 30));
             assertThat(IntList.of(10, 20, -30)).isNotEqualTo(IntList.of(10, 20, 30));
@@ -448,19 +493,6 @@ class IntListTest {
             assertThat(IntList.of(10, 20, 30)).isLessThan(IntList.of(10, 20, 35));
             assertThat(IntList.of(10, 20, 30)).isGreaterThan(IntList.of(10, 20));
             assertThat(IntList.of(10, 20, 35)).isGreaterThan(IntList.of(10, 20, 30));
-        }
-
-        @Example
-        void range() {
-            assertThat(IntList.range(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4));
-            assertThat(IntList.range(1, 1)).isEqualTo(IntList.of());
-        }
-
-        @Example
-        void rangeClosed() {
-            assertThat(IntList.rangeClosed(1, 5)).isEqualTo(IntList.of(1, 2, 3, 4, 5));
-            assertThat(IntList.rangeClosed(1, 1)).isEqualTo(IntList.of(1));
-            assertThat(IntList.rangeClosed(1, 0)).isEqualTo(IntList.of());
         }
     }
 
@@ -554,6 +586,8 @@ class IntListTest {
                     .withAction(new MirrorState.DropAction())
                     .withAction(new MirrorState.TakeRightAction())
                     .withAction(new MirrorState.DropRightAction())
+                    .withAction(new MirrorState.TakeWhileAction())
+                    .withAction(new MirrorState.DropWhileAction())
                     .withAction(5, new MirrorState.MapAction())
                     .withAction(3, new MirrorState.FlatMapAction())
                     .withAction(new MirrorState.FilterAction())

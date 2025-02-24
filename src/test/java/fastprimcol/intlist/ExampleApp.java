@@ -14,7 +14,7 @@ public class ExampleApp {
     }
 
     public static void immutable_chain() {
-        final  IntList numbers = IntList.of(6, 5, 4);
+        final IntList numbers = IntList.of(6, 5, 4);
 
         final IntList modifiedNumbers = numbers
                 .swap(0, 2) // Returns a new immutable instance
@@ -40,22 +40,52 @@ public class ExampleApp {
         System.out.printf("modifiedNumbers=%s\n", modifiedNumbers);
     }
 
-    public static void build_initial() {
-        final IntList numbers = IntList.build(1, 3, builder -> {
-            builder.append(1);
-            builder.append(2);
-            builder.append(3);
-            builder.prepend(0);
-        });
+    public static void mutable_chain_optimized() {
+        final IntList numbers = IntList.of(6, 5, 4);
+
+        final IntList modifiedNumbers = numbers.toBuilder(3, 1) // Leading capacity 3, trailing capacity 1
+                .swap(0, 2)
+                .append(7) // Trailing buffer is used, no reallocation nor move is performed
+                .prependAll(IntList.of(1, 2, 3)) // Leading buffer is used, no reallocation nor move is performed
+                .map(i -> i * 10)
+                .build();
+
+        System.out.printf("numbers=%s\n", numbers);
+        System.out.printf("modifiedNumbers=%s\n", modifiedNumbers);
+    }
+
+    public static void build_lambda() {
+        final IntList numbers = IntList.build(1, 3, builder -> builder
+                .append(1)
+                .append(2)
+                .append(3)
+                .prepend(0)
+        );
 
         System.out.printf("numbers=%s\n", numbers);
     }
 
+    public static void modify_lambda() {
+        final IntList numbers = IntList.of(6, 5, 4);
+
+        final IntList modifiedNumbers = numbers.modify(3, 1, builder -> builder
+                .swap(0, 2)
+                .append(7)
+                .prependAll(IntList.of(1, 2, 3))
+                .map(i -> i * 10)
+        );
+
+        System.out.printf("numbers=%s\n", numbers);
+        System.out.printf("modifiedNumbers=%s\n", modifiedNumbers);
+
+    }
 
     public static void main(String[] args) {
         immutability();
         immutable_chain();
         mutable_chain();
-        build_initial();
+        mutable_chain_optimized();
+        build_lambda();
+        modify_lambda();
     }
 }
