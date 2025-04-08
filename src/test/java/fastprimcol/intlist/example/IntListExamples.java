@@ -1,6 +1,8 @@
-package fastprimcol.intlist;
+package fastprimcol.intlist.example;
 
-public class ExampleApp {
+import fastprimcol.intlist.IntList;
+
+public class IntListExamples {
     public static void immutability() {
         final IntList numbers = IntList.of(9, 5, 4);
         // Immutable list of numbers
@@ -77,7 +79,6 @@ public class ExampleApp {
 
         System.out.printf("numbers=%s\n", numbers);
         System.out.printf("modifiedNumbers=%s\n", modifiedNumbers);
-
     }
 
     public static void main(String[] args) {

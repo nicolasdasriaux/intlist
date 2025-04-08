@@ -441,7 +441,7 @@ public class IntList implements Comparable<IntList> {
         }
 
         public int freeCapacity() {
-            return buffer.length - end + start;
+            return start + buffer.length - end;
         }
 
         public int get(int index) {
