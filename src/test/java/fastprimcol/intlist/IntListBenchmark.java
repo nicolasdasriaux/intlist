@@ -11,30 +11,46 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class IntListBenchmark {
 	public static class Append {
 		@Benchmark
 		@BenchmarkMode(Mode.Throughput)
-		public void append() {
-			final IntList.Builder builder = IntList.of(1, 2, 3).toBuilder(0, 10);
+		public void list() {
+			final List<Integer> initial = List.of(1, 2, 3);
+			final List<Integer> buffer = new ArrayList<>(initial);
+
+			for (int i = 4; i <= 10; i++) {
+				buffer.add(i);
+			}
+
+			final List<Integer> result = Collections.unmodifiableList(buffer);
+		}
+
+		@Benchmark
+		@BenchmarkMode(Mode.Throughput)
+		public void array() {
+			int[] result = new int[]{1, 2, 3};
+
+			for (int i = 4; i <= 10; i++) {
+				result = ArrayUtils.add(result, i);
+			}
+		}
+
+		@Benchmark
+		@BenchmarkMode(Mode.Throughput)
+		public void intlist() {
+			final IntList initial = IntList.of(1, 2, 3);
+			final IntList.Builder builder = initial.toBuilder(0, 10);
 
 			for (int i = 4; i <= 10; i++) {
 				builder.append(i);
 			}
 
-			final IntList intList = builder.build();
-		}
-
-		@Benchmark
-		@BenchmarkMode(Mode.Throughput)
-		public void append_apache_commons() {
-			int[] array = new int[]{1, 2, 3};
-
-			for (int i = 4; i <= 10; i++) {
-				array = ArrayUtils.add(array, i);
-			}
+			final IntList result = builder.build();
 		}
 	}
 

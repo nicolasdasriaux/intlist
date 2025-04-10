@@ -3,15 +3,15 @@ footer: `IntList`, an efficient list of integers
 slidenumbers: true
 
 # `IntList`
-## An efficient list of integers
+## An **efficient list of integers** in _Java_
 
 ---
 
-# The Problem with **Boxing** and **Unboxing**
+#  **Boxing** and **Unboxing**
 
 ---
 
-# Implicit Boxing and Unboxing
+# Implicit **Boxing** and **Unboxing**
 
 
 ```java
@@ -24,7 +24,7 @@ int unboxed = boxed;
 
 ---
 
-# Boxing
+# **Boxing**
 
 ```java
 final Integer a1 = Integer.valueOf(10_000);
@@ -38,7 +38,7 @@ assert a1 != a2; // Different object reference
 
 ---
 
-# Boxing (not so naive)
+# **Boxing** (not so naive)
 
 ```java
 final Integer a1 = Integer.valueOf(5);
@@ -52,7 +52,7 @@ assert a1 == a2; // Same object reference
 
 ---
 
-# Unboxing
+# **Unboxing**
 
 ```java
 final Integer boxed = Integer.valueOf(5);
@@ -63,7 +63,7 @@ final int unboxed = boxed.intValue();
 
 ---
 
-# Unboxing `null`
+# Unboxing `null` :bomb:
 
 ```java
 final Integer boxed = null;
@@ -81,7 +81,7 @@ try {
 
 ---
 
-# Boxes and Unboxes All The Time
+# Boxes and Unboxes All The Time :thumbsdown:
 
 ```java
 final ArrayList<Integer> list = new ArrayList<>();
@@ -94,7 +94,7 @@ final int item = list.get(0); // Unboxing
 
 ---
 
-# Accepts `null`
+# Accepts `null` :thumbsdown:
 
 ```java
 final ArrayList<Integer> list = new ArrayList<>();
@@ -109,7 +109,7 @@ try {
 
 ---
 
-# Mutable by Default, at Best Unmodifiable
+# **Mutable** by Default, **Unmodifiable** at Best :thumbsdown:
 
 ```java
 final List<Integer> mutableList = new ArrayList<>();
@@ -127,7 +127,7 @@ try {
 
 ---
 
-# Boilerplaty
+# Cumbersome API :thumbsdown:
 
 ```java
 public static class Lists {
@@ -150,15 +150,15 @@ public static class Lists {
 
 ---
 
-# Poor Memory and CPU Efficiency
+# Poor Memory and CPU Efficiency :thumbsdown:
 
 * **Boxing**
-    * Object creations (`new`)
+    * Object creations (`new`)  :thumbsdown:
 * **Unboxing**
-    * Dereferencing
+    * Dereferencing :thumbsdown:
 * **`Integer` objects**
-    * Scattered in the _heap_
-    * Not memory efficient
+    * Scattered in the _heap_, defeats CPU cache :thumbsdown:
+    * Not memory efficient :thumbsdown:
 
 ---
 
@@ -226,19 +226,19 @@ public class ListBuilder<T> { // ...
 
 ---
 
-# Arrays to the Rescue! Really?
+# **Array** to the Rescue! Not so...
 
 ---
 
-# Very Memory and CPU Efficient
+# Very Memory and CPU Efficient :thumbsup:
 
-* No boxing
-* No unboxing
-* Contiguous storage in memory
+* No boxing :thumbsup:
+* No unboxing :thumbsup:
+* Contiguous storage in memory :thumbsup:
 
 ---
 
-# Only Mutable and Not Even Extensible
+# Only Mutable and Non-Extensible :thumbsdown:
 
 ```java
 final int[] array = {1, 2, 3};
@@ -253,7 +253,7 @@ modifiedArray[modifiedArray.length - 1] = 40;
 
 ---
 
-# Broken `toString`
+# Broken `toString` :thumbsdown:
 
 ```java
 final int[] array = {1, 2, 3};
@@ -269,7 +269,7 @@ System.out.println(result);
 
 ---
 
-# Broken `equals`
+# Broken `equals` :thumbsdown:
 
 ```java
 final int[] array1 = {1, 2, 3};
@@ -284,7 +284,7 @@ assert result : "OK";
 
 ---
 
-# Broken `hashCode`
+# Broken `hashCode` :thumbsdown:
 
 ```java
 final int[] array1 = {1, 2, 3};
@@ -299,7 +299,7 @@ assert result : "OK";
 
 ---
 
-# Very Poor API
+# Very Poor API :thumbsdown:
 
 ```java
 public class MoreArrays {
@@ -319,7 +319,7 @@ public class MoreArrays {
 
 ---
 
-# **Apache Commons**, maybe not... 
+# _**Apache Commons**_, maybe not... 
 
 ```java
 final int[] list1 = {1, 2, 3};
@@ -339,25 +339,26 @@ final int[] result = step3;
 ---
 
 # `IntList`
-# Can we do better?
+## Simple **and** efficient?
 
 ---
 
-# Phase 1: Developer Experience
-## Building an experimental API
+## Phase 1
+# **Experimental API**
+### Reaching for developper experience
 
 ---
 
-# Experimental API
+# **Experimental API**
 
-* Few features
+* Limited number of features
 * Simplified implementation
 * Not necessarily fully correct
-* Reaching for developer experience
+* To assess developer experience
 
 ---
 
-# Immutable API for Correctness
+# **Immutable API** for Correctness (`IntList`)
 
 ```java
 final IntList numbers = IntList.of(9, 5, 4);
@@ -384,7 +385,7 @@ final IntList modifiedNumbers = numbers
 
 ---
 
-#  Mutable API for Efficiency
+#  **Mutable API** for Efficiency (`IntList.Builder`)
 
 ```java
 final IntList numbers = IntList.of(6, 5, 4);
@@ -399,14 +400,16 @@ final IntList modifiedNumbers = numbers.toBuilder() // Returns a new mutable bui
 
 ---
 
-# Phase 2: Implementation
-## Reaching for efficiency
+## Phase 2
+# **Preliminary Implementation**
+### Reaching for efficiency
 
 ---
 
 # A **Buffer** for the `Builder`
 
 * **Goal**
+  * Perform changes in-place on the buffer
   * Extend buffer capacity when not enough space
   * While minimizing **moves** and **reallocations** (implying recopies) for performance
 * **Several attempts**
@@ -437,7 +440,7 @@ public class Builder {
 
 ---
 
-# Implementing `append` and `prepend` methods
+# Implementing Methods
 
 ```java
 public class Builder {
@@ -473,4 +476,198 @@ final IntList modifiedNumbers = numbers.toBuilder(3, 1)
         // Leading buffer is used, no reallocation nor move is performed
         .map(i -> i * 10)
         .build();
+```
+
+---
+
+## Phase 3
+# **Efficiency Assessment**
+### Assessing performance
+
+---
+
+# The Challenge with **Microbenchmarks**
+
+* Easy to manipulate
+* Easy to misinterpret
+* Benchmarking on JVM is full of pitfalls 
+
+---
+
+# _**JMH**_
+
+* _**JMH**_ stands for **Java Microbenchmarking Harness**
+* Accounts for JVM optimizations and other pitfalls
+* Provides accurate, reproducible benchmarking results
+* Supports various modes of benchmarking, including **throughput**, **average time**, and **sample time**
+
+---
+
+# Setup
+
+```java
+public class IntListBenchmark {
+	public static class Append {
+        // ...
+	}
+
+	public static void main(String[] args) throws RunnerException {
+		final Options options = new OptionsBuilder()
+				.include(IntListBenchmark.Append.class.getSimpleName())
+				.forks(1)
+				.build();
+
+		new Runner(options).run();
+	}
+}
+```
+
+---
+
+# Benchmarks
+
+```java
+public class IntListBenchmark {
+    public static class Append {
+        @Benchmark
+        @BenchmarkMode(Mode.Throughput)
+        public void list() { /* ... */ }
+
+        @Benchmark
+        @BenchmarkMode(Mode.Throughput)
+        public void array() { /* ... */ }
+
+        @Benchmark
+        @BenchmarkMode(Mode.Throughput)
+        public void intlist() { /* ... */ }
+        }
+    } // ...
+}
+```
+
+---
+
+# Benchmarking `List<Integer>`
+
+```java
+@Benchmark
+@BenchmarkMode(Mode.Throughput)
+public void list() {
+    final List<Integer> initial = List.of(1, 2, 3);
+    final List<Integer> buffer = new ArrayList<>(initial);
+
+    for (int i = 4; i <= 10; i++) {
+        buffer.add(i);
+    }
+
+    final List<Integer> result = Collections.unmodifiableList(buffer);
+}
+```
+
+---
+
+# Benchmarking `int[]`
+
+```java
+@Benchmark
+@BenchmarkMode(Mode.Throughput)
+public void array() {
+    int[] result = new int[]{1, 2, 3};
+
+    for (int i = 4; i <= 10; i++) {
+        result = ArrayUtils.add(result, i);
+    }
+}
+```
+
+---
+
+# Benchmarking `IntList`
+
+```java
+@Benchmark
+@BenchmarkMode(Mode.Throughput)
+public void intlist() {
+    final IntList initial = IntList.of(1, 2, 3);
+    final IntList.Builder builder = initial.toBuilder(0, 10);
+
+    for (int i = 4; i <= 10; i++) {
+        builder.append(i);
+    }
+
+    final IntList result = builder.build();
+}
+```
+
+---
+ 
+# Benchmark Results
+
+```
+Benchmark                         Mode  Cnt         Score         Error  Units
+IntListBenchmark.Append.list     thrpt    5   5728576,691 ± 1758171,235  ops/s
+IntListBenchmark.Append.array    thrpt    5   5103144,599 ±  473447,116  ops/s
+IntListBenchmark.Append.intlist  thrpt    5  15538682,673 ± 5607228,935  ops/s
+```
+
+---
+
+## Phase 4
+# **Scaling Implementation**
+### Reaching for simplicity
+
+---
+
+# Mirrored **Immutable** and **Mutable API**
+
+* **Mutable API**
+  * Implemented in `IntList.Buffer`
+  * Focus on **efficiency**
+  * **Actual implementation** for methods
+* **Immutable API**
+  * Implemented in `IntList`
+  * Focus on **ease of use**
+  * Most methods perform **delegation** to corresponding method in `IntList.Buffer`
+
+---
+
+# **Transformation** method
+
+```java
+public class IntList {
+    public IntList set(int index, int value) {
+        return toBuilder() // Create a mutable builder from this immutable IntList
+                .set(index, value) // Let the builder perform the transformation on itself
+                .unsafeBuild(); // Create an immutable IntList from this mutable builder
+    }
+
+    public static class Builder {
+        public Builder set(int index, int value) {
+            // Actual implementation
+            // This is where the transformation is actually performed by mutating this mutable builder.
+            return this; // Return this builder
+        }
+    }
+}
+```
+
+---
+
+# **Query** method
+
+
+```java
+public class IntList {
+    public boolean contains(int value) {
+        return unsafeToBuilder() // Create a mutable builder from this immutable IntList
+                .contains(value); // Let the builder perform the computation and return the result
+    }
+    
+    public static class Builder {
+        public boolean contains(int value) {
+            // Actual implementation
+            // This is where the computation is actually performed 
+        }
+    }
+}
 ```
