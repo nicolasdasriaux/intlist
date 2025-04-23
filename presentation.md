@@ -400,6 +400,18 @@ final IntList modifiedNumbers = numbers.toBuilder() // Returns a new mutable bui
 
 ---
 
+# Practice : **Exploring API**
+
+Generate a list of numbers from 1 to 20 (`rangeClosed`),
+beginning with 1 (`prepend`),
+ending with 19 and 20 (`appendAll`),
+and all mixed in-between (`shuffle`)
+
+* Implement with **immutable API**
+* Implement with **mutable API**
+
+---
+
 ## Phase 2
 # **Preliminary Implementation**
 ### Reaching for efficiency
@@ -409,7 +421,7 @@ final IntList modifiedNumbers = numbers.toBuilder() // Returns a new mutable bui
 # A **Buffer** for the `Builder`
 
 * **Goal**
-  * Perform changes in-place on the buffer
+  * Perform changes in-place on the **buffer**
   * Extend buffer capacity when not enough space
   * While minimizing **moves** and **reallocations** (implying recopies) for performance
 * **Several attempts**
@@ -480,9 +492,20 @@ final IntList modifiedNumbers = numbers.toBuilder(3, 1)
 
 ---
 
+# Practice : **Exploring Optimizing API**
+
+Generate a list of numbers from 1 to 20 (`rangeClosed`),
+beginning with 1 (`prepend`),
+ending with 19 and 20 (`appendAll`),
+and all mixed in-between (`shuffle`)
+
+* Implement with **optimizing mutable API** (`build` with parameters)
+
+---
+
 ## Phase 3
-# **Efficiency Assessment**
-### Assessing performance
+# **Performance Testing**
+### Assessing efficiency
 
 ---
 
@@ -612,6 +635,19 @@ IntListBenchmark.Append.intlist  thrpt    5  15538682,673 ± 5607228,935  ops/s
 
 ---
 
+# Practice : **Benchmarking APIs**
+
+Generate a list of numbers from 1 to 20 (`rangeClosed`),
+beginning with 1 (`prepend`),
+ending with 19 and 20 (`appendAll`),
+and all mixed in-between (`shuffle`)
+
+* Benchmark **immutable API** implementation
+* Benchmark **mutable API** implementation
+* Benchmark **optimizing mutable API** implementation
+
+---
+
 ## Phase 4
 # **Scaling Implementation**
 ### Reaching for simplicity
@@ -671,3 +707,120 @@ public class IntList {
     }
 }
 ```
+
+---
+
+## Phase 5
+# **Testing Strategy**
+### Reaching for correctness
+
+---
+
+# Testing
+
+* **Example-based testing** with _**jqwik**_ (maybe _**JUnit 5**_ in the future)
+  * Typical test case
+  * Assert conditions that should apply to the test case
+* **Property testing** with _**jqwik**_
+  * Large number of generated test cases
+  * Assert conditions (called **properties**) that should apply to all these test cases
+* **Statefull property testing** with _**jqwik**_
+  * Property testing generalized to test subject with mutable state
+  * Too deep for today
+  * Still experimental
+
+---
+
+# **Example-Based Testing**
+
+```java
+@Group
+class IntListTest { // ...
+    @Group
+    class IntListFeatures { // ...
+        @Example
+        void appendAll() {
+            assertThat(IntList.of(10, 20, 30).appendAll(IntList.of(31, 32, 33)))
+                    .isEqualTo(IntList.of(10, 20, 30, 31, 32, 33));
+        }
+
+        @Example
+        void prependAll() {
+            assertThat(IntList.of(10, 20, 30).prependAll(IntList.of(1, 2, 3)))
+                    .isEqualTo(IntList.of(1, 2, 3, 10, 20, 30));
+        } // ...
+    } // ...
+}
+```
+
+---
+
+# **Property Testing**
+
+```java
+@Group
+class IntListTest { // ...
+    @Group
+    class IntListProperties { // ...
+      @Property
+      void appendAll_prependAll(
+              @ForAll("intList") IntList as,
+              @ForAll("intList") IntList bs) {
+
+        final IntList l1 = as.appendAll(bs);
+        final IntList l2 = bs.prependAll(as);
+        assertThat(l1).isEqualTo(l2);
+      } // ...
+    } // ...
+}
+```
+
+---
+
+# Generators for **Property Testing**
+
+```java
+@Group
+class IntListTest { // ...
+    @Group
+    class IntListProperties { // ...
+    } // ...
+  
+    @Provide("intList")
+    Arbitrary<IntList> intList() {
+        return integer()
+                .array(int[].class)
+                .ofMinSize(0)
+                .ofMaxSize(100)
+                .map(IntList::of);
+  } // ...
+}
+```
+
+---
+
+# Contributing
+
+---
+
+# Many ways to contribute
+
+* Feedback about a feature
+* Proposal for a feature
+* Prototype
+* Documentation
+* Code
+
+---
+
+# Practice : **Implementing Features**
+
+Inspire from _Vavr_ `Vector` API
+
+* `.removeFirst(IntPredicate)` **/** `.removeLast(IntPredicate)`
+* `.reject(IntPredicate)`
+* `.rotateLeft(int)` **/** `.rotateRight(int)`
+* `.distinct()`
+* `.indexWhere(IntPredicate)` **/** `.lastIndexWhere(IntPredicate)`
+* `.count(IntPredicate)` **/** `.forAll(IntPredicate)` **/** `.exists(IntPredicate)`
+* `.sum()` **/** `.product()`

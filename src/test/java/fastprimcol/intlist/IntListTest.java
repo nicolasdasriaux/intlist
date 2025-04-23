@@ -18,6 +18,7 @@ import java.util.function.IntPredicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Group
 class IntListTest {
     @Group
     class IntListFeatures {
@@ -595,13 +596,13 @@ class IntListTest {
         }
     }
 
-    @Provide
+    @Provide("integer")
     Arbitrary<Integer> integer() {
         return Arbitraries.integers()
                 .between(1, 50);
     }
 
-    @Provide
+    @Provide("intList")
     Arbitrary<IntList> intList() {
         return integer()
                 .array(int[].class)
